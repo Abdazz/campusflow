@@ -20,6 +20,8 @@ class User {
     );
   }
 
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'email': email};
+
   User copyWith({String? id, String? name, String? email}) {
     return User(
       id: id ?? this.id,
@@ -27,6 +29,16 @@ class User {
       email: email ?? this.email,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is User &&
+      other.id == id &&
+      other.name == name &&
+      other.email == email;
+
+  @override
+  int get hashCode => Object.hash(id, name, email);
 
   @override
   String toString() => 'User($id, "$name", $email)';

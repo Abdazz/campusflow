@@ -16,6 +16,8 @@ class Course {
     );
   }
 
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'teacher': teacher};
+
   Course copyWith({String? id, String? name, String? teacher}) {
     return Course(
       id: id ?? this.id,
@@ -23,6 +25,16 @@ class Course {
       teacher: teacher ?? this.teacher,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is Course &&
+      other.id == id &&
+      other.name == name &&
+      other.teacher == teacher;
+
+  @override
+  int get hashCode => Object.hash(id, name, teacher);
 
   @override
   String toString() => 'Course($id, "$name", $teacher)';

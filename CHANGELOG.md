@@ -1,3 +1,5 @@
 ## 1.0.0
 
-- Initial version.
+- Modèles Task, Course et User avec copyWith, fromJson et toJson.
+- Dépôt simulé CampusRepository (Future.delayed).
+- Tests unitaires.

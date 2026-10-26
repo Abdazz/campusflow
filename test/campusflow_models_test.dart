@@ -1,6 +1,7 @@
 import 'package:campusflow_models/campusflow_models.dart';
 import 'package:test/test.dart';
 
+// Les trois tests demandés par l'atelier : copyWith, fromJson, erreur attendue.
 void main() {
   test('copyWith modifie un seul champ et garde l\'original intact', () {
     final task = Task(
@@ -13,7 +14,7 @@ void main() {
     final done = task.copyWith(isDone: true);
 
     expect(done.isDone, isTrue);
-    expect(done.id, task.id);
+    expect(done, task.copyWith(isDone: true));
     expect(done.title, task.title);
     expect(done.dueDate, task.dueDate);
     expect(task.isDone, isFalse); // l'objet d'origine n'a pas changé

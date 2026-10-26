@@ -3,7 +3,7 @@ import 'package:campusflow_models/campusflow_models.dart';
 Future<void> main() async {
   const repository = CampusRepository();
 
-  print('Chargement des données…');
+  print('Chargement des données...');
   final user = await repository.fetchCurrentUser();
   final courses = await repository.fetchCourses();
   final tasks = await repository.fetchTasks();
@@ -11,7 +11,7 @@ Future<void> main() async {
   print('Bonjour ${user.name} (${user.email})');
   print('\n${courses.length} cours :');
   for (final course in courses) {
-    print('  - ${course.name} · ${course.teacher}');
+    print('  - ${course.name}, ${course.teacher}');
   }
 
   final now = DateTime(2026, 10, 28);
@@ -28,4 +28,11 @@ Future<void> main() async {
   // Marquer comme fait : on remplace l'objet par une copie.
   final updated = tasks.first.copyWith(isDone: true);
   print('\nAprès copyWith : $updated');
+
+  // Erreur attendue : identifiant inconnu.
+  try {
+    await repository.fetchTaskById('t99');
+  } on TaskNotFoundException catch (e) {
+    print('\nErreur gérée : $e');
+  }
 }

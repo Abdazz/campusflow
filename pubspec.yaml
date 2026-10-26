@@ -1,5 +1,5 @@
 name: campusflow_models
-description: A starting point for Dart libraries or applications.
+description: Modèles de données de CampusFlow (Task, Course, User) en Dart pur.
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 
