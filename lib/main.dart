@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
+import 'screens/home_shell.dart';
 import 'screens/title_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -26,7 +27,13 @@ class CampusFlowApp extends StatelessWidget {
       locale: const Locale('fr', 'FR'),
       supportedLocales: const [Locale('fr', 'FR')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: TitleScreen(onStart: () {}),
+      home: Builder(
+        builder: (context) => TitleScreen(
+          onStart: () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute<void>(builder: (_) => const HomeShell()),
+          ),
+        ),
+      ),
     );
   }
 }

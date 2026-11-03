@@ -40,12 +40,11 @@ abstract final class AppTheme {
       seedColor: AppColors.seed,
       brightness: brightness,
     );
-    final textTheme = _textTheme(
-      ThemeData(brightness: brightness).textTheme,
-    ).apply(
-      bodyColor: colorScheme.onSurface,
-      displayColor: colorScheme.onSurface,
-    );
+    final textTheme = _textTheme(ThemeData(brightness: brightness).textTheme)
+        .apply(
+          bodyColor: colorScheme.onSurface,
+          displayColor: colorScheme.onSurface,
+        );
 
     return ThemeData(
       useMaterial3: true,
