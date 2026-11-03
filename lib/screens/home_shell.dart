@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../data/sample_data.dart';
 import '../models/task.dart';
+import '../theme/app_theme.dart';
+import '../utils/date_labels.dart';
 import 'other_tabs.dart';
 import 'task_form_screen.dart';
 import 'tasks_screen.dart';
 
-/// Ossature principale : AppBar, onglets (NavigationBar) et bouton flottant.
+/// Ossature principale : AppBar, onglets et bouton flottant.
+///
+/// Téléphone (< 600 dp) : barre de navigation inférieure.
+/// À partir de 600 dp : rail de navigation à gauche (page de tokens).
 ///
 /// L'état (liste des tâches, sélection) vit ici et est géré avec
 /// `setState` ; Riverpod prendra le relais à la séance 6.
@@ -24,13 +29,6 @@ class _HomeShellState extends State<HomeShell> {
   late final List<Task> _tasks = [...(widget.initialTasks ?? sampleTasks())];
   int _tabIndex = 0;
   String? _selectedTaskId;
-
-  /// Les tâches à faire d'abord, chacune triée par échéance.
-  List<Task> get _sortedTasks => [..._tasks]
-    ..sort((a, b) {
-      if (a.isDone != b.isDone) return a.isDone ? 1 : -1;
-      return a.dueDate.compareTo(b.dueDate);
-    });
 
   void _replaceTask(Task updated) {
     setState(() {
@@ -53,54 +51,184 @@ class _HomeShellState extends State<HomeShell> {
     });
   }
 
-  static const _titles = ['Échéances', 'Cours', 'Profil'];
+  static const _destinations = [
+    (
+      icon: Icons.calendar_today_outlined,
+      selectedIcon: Icons.calendar_today,
+      label: 'Échéances',
+    ),
+    (
+      icon: Icons.menu_book_outlined,
+      selectedIcon: Icons.menu_book,
+      label: 'Cours',
+    ),
+    (icon: Icons.person_outline, selectedIcon: Icons.person, label: 'Profil'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final tasks = _sortedTasks;
+    final wide = MediaQuery.sizeOf(context).width >= AppBreakpoints.medium;
 
     final body = switch (_tabIndex) {
       0 => TasksView(
-        tasks: tasks,
+        tasks: _tasks,
         selectedTaskId: _selectedTaskId,
         onSelect: (task) => setState(() => _selectedTaskId = task.id),
-        onToggleDone: _replaceTask,
+        onChanged: _replaceTask,
       ),
-      1 => CoursesView(tasks: tasks),
-      _ => const ProfileView(),
+      1 => CoursesView(tasks: _tasks),
+      _ => ProfileView(tasks: _tasks),
+    };
+
+    final (String title, String subtitle) = switch (_tabIndex) {
+      0 => ('Cette semaine', weekRangeLabel()),
+      1 => ('Mes cours', 'Semestre 1 · ${sampleCourses.length} modules'),
+      _ => ('Profil', currentUser.program),
     };
 
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_tabIndex])),
-      body: SafeArea(child: body),
-      floatingActionButton: _tabIndex == 0
+      appBar: _HeaderBar(
+        title: title,
+        subtitle: subtitle,
+        onAvatarTap: _tabIndex == 2
+            ? null
+            : () => setState(() => _tabIndex = 2),
+      ),
+      body: SafeArea(
+        bottom: false,
+        child: wide
+            ? Row(
+                children: [
+                  NavigationRail(
+                    selectedIndex: _tabIndex,
+                    onDestinationSelected: (i) => setState(() => _tabIndex = i),
+                    labelType: NavigationRailLabelType.all,
+                    // Avec le rail, le bouton d'ajout se place en tête du
+                    // rail (Material 3) : il ne masque plus le détail.
+                    leading: Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 16),
+                      child: FloatingActionButton(
+                        onPressed: _addTask,
+                        tooltip: 'Nouvelle tâche',
+                        elevation: 0,
+                        child: const Icon(Icons.add_rounded),
+                      ),
+                    ),
+                    destinations: [
+                      for (final d in _destinations)
+                        NavigationRailDestination(
+                          icon: Icon(d.icon),
+                          selectedIcon: Icon(d.selectedIcon),
+                          label: Text(d.label),
+                        ),
+                    ],
+                  ),
+                  const VerticalDivider(width: 1),
+                  Expanded(child: body),
+                ],
+              )
+            : body,
+      ),
+      floatingActionButton: !wide && _tabIndex == 0
           ? FloatingActionButton.extended(
               onPressed: _addTask,
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add_rounded, size: 24),
               label: const Text('Nouvelle tâche'),
             )
           : null,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tabIndex,
-        onDestinationSelected: (index) => setState(() => _tabIndex = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.event_note_outlined),
-            selectedIcon: Icon(Icons.event_note),
-            label: 'Échéances',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
-            label: 'Cours',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profil',
+      bottomNavigationBar: wide
+          ? null
+          : DecoratedBox(
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: AppColors.outlineVariant),
+                ),
+              ),
+              child: NavigationBar(
+                selectedIndex: _tabIndex,
+                onDestinationSelected: (i) => setState(() => _tabIndex = i),
+                destinations: [
+                  for (final d in _destinations)
+                    NavigationDestination(
+                      icon: Icon(d.icon),
+                      selectedIcon: Icon(d.selectedIcon),
+                      label: d.label,
+                    ),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+/// En-tête des onglets : grand titre, sous-titre et avatar.
+class _HeaderBar extends StatelessWidget implements PreferredSizeWidget {
+  const _HeaderBar({
+    required this.title,
+    required this.subtitle,
+    required this.onAvatarTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final VoidCallback? onAvatarTap;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(88);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return AppBar(
+      toolbarHeight: 88,
+      titleSpacing: 20,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(title, style: theme.textTheme.headlineMedium),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w400,
+              color: colors.onSurfaceVariant,
+            ),
           ),
         ],
       ),
+      actions: [
+        if (onAvatarTap != null)
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Tooltip(
+              message: 'Profil de ${currentUser.name}',
+              child: Material(
+                color: colors.primaryContainer,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: onAvatarTap,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Center(
+                      child: Text(
+                        currentUser.initials,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: colors.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -1,5 +1,21 @@
 import 'json_utils.dart';
 
+/// Moment du rappel avant l'échéance (formulaire « Nouvelle tâche »).
+enum Reminder {
+  dayBefore('La veille'),
+  sameDay('Le jour J'),
+  none('Aucun');
+
+  const Reminder(this.label);
+
+  final String label;
+
+  static Reminder fromName(String? name) => Reminder.values.firstWhere(
+    (r) => r.name == name,
+    orElse: () => Reminder.dayBefore,
+  );
+}
+
 /// Une échéance à rendre (TP, projet, examen...) rattachée à un cours.
 class Task {
   final String id;
@@ -8,6 +24,7 @@ class Task {
   final DateTime dueDate;
   final String? description;
   final bool isDone;
+  final Reminder reminder;
 
   const Task({
     required this.id,
@@ -16,6 +33,7 @@ class Task {
     required this.dueDate,
     this.description,
     this.isDone = false,
+    this.reminder = Reminder.dayBefore,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -30,6 +48,9 @@ class Task {
       dueDate: readDate(json, 'dueDate', 'Task'),
       description: readOptionalField<String>(json, 'description', 'Task'),
       isDone: readOptionalField<bool>(json, 'isDone', 'Task') ?? false,
+      reminder: Reminder.fromName(
+        readOptionalField<String>(json, 'reminder', 'Task'),
+      ),
     );
   }
 
@@ -40,6 +61,7 @@ class Task {
     'dueDate': dueDate.toIso8601String(),
     if (description != null) 'description': description,
     'isDone': isDone,
+    'reminder': reminder.name,
   };
 
   /// Les objets sont immuables : on crée une copie modifiée.
@@ -50,6 +72,7 @@ class Task {
     DateTime? dueDate,
     String? description,
     bool? isDone,
+    Reminder? reminder,
   }) {
     return Task(
       id: id ?? this.id,
@@ -58,6 +81,7 @@ class Task {
       dueDate: dueDate ?? this.dueDate,
       description: description ?? this.description,
       isDone: isDone ?? this.isDone,
+      reminder: reminder ?? this.reminder,
     );
   }
 
@@ -72,11 +96,12 @@ class Task {
       other.courseId == courseId &&
       other.dueDate == dueDate &&
       other.description == description &&
-      other.isDone == isDone;
+      other.isDone == isDone &&
+      other.reminder == reminder;
 
   @override
   int get hashCode =>
-      Object.hash(id, title, courseId, dueDate, description, isDone);
+      Object.hash(id, title, courseId, dueDate, description, isDone, reminder);
 
   @override
   String toString() =>
