@@ -39,6 +39,9 @@ abstract final class AppTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.seed,
       brightness: brightness,
+      // « fidelity » garde la couleur primaire proche du rouge de la marque
+      // (la variante par défaut l'adoucit en brun).
+      dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
     );
     final textTheme = _textTheme(ThemeData(brightness: brightness).textTheme)
         .apply(
@@ -55,7 +58,6 @@ abstract final class AppTheme {
         centerTitle: false,
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
-        titleTextStyle: textTheme.titleLarge,
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -81,7 +83,6 @@ abstract final class AppTheme {
         style: FilledButton.styleFrom(
           // Cible tactile d'au moins 48 dp (accessibilité).
           minimumSize: const Size(64, 48),
-          textStyle: textTheme.labelLarge,
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
