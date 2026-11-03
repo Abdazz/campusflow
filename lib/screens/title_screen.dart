@@ -23,7 +23,12 @@ class TitleScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.event_note, size: 96, color: colors.primary),
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: 112,
+                    height: 112,
+                    semanticLabel: 'Logo CampusFlow',
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                   Text('CampusFlow', style: theme.textTheme.displaySmall),
                   const SizedBox(height: AppSpacing.sm),
