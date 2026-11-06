@@ -58,6 +58,8 @@ class HomeShell extends StatelessWidget {
               children: [
                 SafeArea(
                   right: false,
+                  // Le rail descend jusqu'en bas, sous la barre de gestes.
+                  bottom: false,
                   child: NavigationRail(
                     selectedIndex: _index,
                     onDestinationSelected: (i) => _goTo(context, i),

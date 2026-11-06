@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/task.dart';
+import '../state/filtres_provider.dart';
 import '../state/taches_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_labels.dart';
@@ -64,18 +65,20 @@ class TasksView extends ConsumerStatefulWidget {
 }
 
 class _TasksViewState extends ConsumerState<TasksView> {
-  bool _showDone = false;
-
   @override
   Widget build(BuildContext context) {
-    final tasks = ref.watch(tachesProvider);
+    // Le filtre est un état partagé : il vit dans filtreProvider, plus dans
+    // un booléen local de l'écran.
+    final filtre = ref.watch(filtreProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
         final expanded = constraints.maxWidth >= AppBreakpoints.expanded;
         final list = _TaskList(
-          tasks: tasks,
-          showDone: _showDone,
-          onFilterChanged: (done) => setState(() => _showDone = done),
+          visible: ref.watch(tachesFiltreesProvider),
+          counts: ref.watch(compteursProvider),
+          filtre: filtre,
+          now: ref.watch(horlogeProvider)(),
+          onFilterChanged: ref.read(filtreProvider.notifier).choisir,
           selectedTaskId: expanded ? widget.selectedTaskId : null,
           // Navigation par adresse : la tâche est dans le chemin. Comme
           // `:id` est une sous-route de `/taches`, le retour ramène à la
@@ -156,34 +159,33 @@ class _TaskRow extends _Row {
 
 class _TaskList extends StatelessWidget {
   const _TaskList({
-    required this.tasks,
-    required this.showDone,
+    required this.visible,
+    required this.counts,
+    required this.filtre,
+    required this.now,
     required this.onFilterChanged,
     required this.selectedTaskId,
     required this.onTap,
     required this.onToggleDone,
   });
 
-  final List<Task> tasks;
-  final bool showDone;
-  final ValueChanged<bool> onFilterChanged;
+  /// Les tâches du filtre actif, déjà triées (tachesFiltreesProvider).
+  final List<Task> visible;
+  final Map<FiltreTaches, int> counts;
+  final FiltreTaches filtre;
+  final DateTime now;
+  final ValueChanged<FiltreTaches> onFilterChanged;
   final String? selectedTaskId;
   final ValueChanged<Task> onTap;
   final ValueChanged<Task> onToggleDone;
 
-  /// Groupe les tâches par jour ; les tâches en retard passent en tête.
-  List<_Row> _buildRows(DateTime now) {
-    final visible = tasks.where((t) => t.isDone == showDone).toList()
-      ..sort(
-        (a, b) => showDone
-            ? b.dueDate.compareTo(a.dueDate)
-            : a.dueDate.compareTo(b.dueDate),
-      );
-
+  /// Groupe les tâches par jour. Dans « À faire », les tâches en retard
+  /// passent en tête sous leur propre en-tête.
+  List<_Row> _buildRows() {
     final rows = <_Row>[];
-    final overdue = showDone
-        ? <Task>[]
-        : visible.where((t) => t.dueDate.isBefore(now)).toList();
+    final overdue = filtre == FiltreTaches.aFaire
+        ? visible.where((t) => t.dueDate.isBefore(now)).toList()
+        : <Task>[];
     if (overdue.isNotEmpty) {
       rows.add(_HeaderRow('En retard', urgent: true));
       rows.addAll(overdue.map(_TaskRow.new));
@@ -193,7 +195,7 @@ class _TaskList extends StatelessWidget {
     for (final task in visible.where((t) => !overdue.contains(t))) {
       final header = sectionLabel(task.dueDate, now: now);
       if (header != lastHeader) {
-        rows.add(_HeaderRow(header));
+        rows.add(_HeaderRow(header, urgent: filtre == FiltreTaches.enRetard));
         lastHeader = header;
       }
       rows.add(_TaskRow(task));
@@ -203,10 +205,9 @@ class _TaskList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final rows = _buildRows(now);
-    final todo = tasks.where((t) => !t.isDone).length;
-    final done = tasks.length - todo;
+    final rows = _buildRows();
+    final todo = counts[FiltreTaches.aFaire]!;
+    final done = counts[FiltreTaches.faites]!;
 
     // Résumé et filtre défilent avec la liste : rien n'est figé en hauteur.
     const leading = 2;
@@ -223,15 +224,14 @@ class _TaskList extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(top: 16, bottom: 6),
             child: _FilterToggle(
-              showDone: showDone,
-              todoCount: todo,
-              doneCount: done,
+              selected: filtre,
+              counts: counts,
               onChanged: onFilterChanged,
             ),
           );
         }
         if (rows.isEmpty) {
-          return _EmptyList(showDone: showDone);
+          return _EmptyList(filtre: filtre);
         }
         return switch (rows[index - leading]) {
           _HeaderRow(:final label, :final urgent) => Padding(
@@ -318,19 +318,18 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-/// Filtre à deux segments « À faire · n » / « Terminées · n ».
+/// Filtre à trois segments « À faire · n », « Faites · n »,
+/// « En retard · n ».
 class _FilterToggle extends StatelessWidget {
   const _FilterToggle({
-    required this.showDone,
-    required this.todoCount,
-    required this.doneCount,
+    required this.selected,
+    required this.counts,
     required this.onChanged,
   });
 
-  final bool showDone;
-  final int todoCount;
-  final int doneCount;
-  final ValueChanged<bool> onChanged;
+  final FiltreTaches selected;
+  final Map<FiltreTaches, int> counts;
+  final ValueChanged<FiltreTaches> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -342,16 +341,12 @@ class _FilterToggle extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _Segment(
-            label: 'À faire · $todoCount',
-            selected: !showDone,
-            onTap: () => onChanged(false),
-          ),
-          _Segment(
-            label: 'Terminées · $doneCount',
-            selected: showDone,
-            onTap: () => onChanged(true),
-          ),
+          for (final filtre in FiltreTaches.values)
+            _Segment(
+              label: '${filtre.label} · ${counts[filtre]}',
+              selected: filtre == selected,
+              onTap: () => onChanged(filtre),
+            ),
         ],
       ),
     );
@@ -388,13 +383,23 @@ class _Segment extends StatelessWidget {
             child: SizedBox(
               height: 40,
               child: Center(
-                child: Text(
-                  label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                    color: selected
-                        ? colors.onSurface
-                        : colors.onSurfaceVariant,
+                // Trois segments sur 360 dp : le libellé rétrécit plutôt
+                // que de passer à la ligne.
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text(
+                      label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w600,
+                        color: selected
+                            ? colors.onSurface
+                            : colors.onSurfaceVariant,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -407,9 +412,9 @@ class _Segment extends StatelessWidget {
 }
 
 class _EmptyList extends StatelessWidget {
-  const _EmptyList({required this.showDone});
+  const _EmptyList({required this.filtre});
 
-  final bool showDone;
+  final FiltreTaches filtre;
 
   @override
   Widget build(BuildContext context) {
@@ -417,9 +422,11 @@ class _EmptyList extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Text(
-        showDone
-            ? 'Aucune tâche terminée pour l’instant.'
-            : 'Rien à rendre : profites-en !',
+        switch (filtre) {
+          FiltreTaches.aFaire => 'Rien à rendre : profites-en !',
+          FiltreTaches.faites => 'Aucune tâche terminée pour l’instant.',
+          FiltreTaches.enRetard => 'Aucun retard, bravo !',
+        },
         textAlign: TextAlign.center,
         style: TextStyle(color: colors.onSurfaceVariant),
       ),

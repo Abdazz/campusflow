@@ -124,6 +124,8 @@ void main() {
     expect(find.text('1 échéance à venir'), findsOneWidget);
     expect(find.text('Rendu TP Dart'), findsNothing);
 
+    expect(find.text('Faites · 2'), findsOneWidget);
+
     _router(tester).go('/taches/a');
     await tester.pumpAndSettle();
     expect(find.text('Marquer comme à faire'), findsOneWidget);
@@ -140,6 +142,31 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Filtres : à faire, faites, en retard', (tester) async {
+    _setScreenSize(tester, const Size(360, 780));
+    await tester.pumpWidget(_app());
+
+    expect(find.text('À faire · 2'), findsOneWidget);
+    expect(find.text('Faites · 1'), findsOneWidget);
+    expect(find.text('En retard · 0'), findsOneWidget);
+
+    await tester.tap(find.text('Faites · 1'));
+    await tester.pump();
+    expect(find.text('Fiche persona'), findsOneWidget);
+    expect(find.text('Rendu TP Dart'), findsNothing);
+
+    await tester.tap(find.text('En retard · 0'));
+    await tester.pump();
+    expect(find.text('Aucun retard, bravo !'), findsOneWidget);
+
+    // Le filtre est un état partagé : il survit à un changement d'onglet.
+    _router(tester).go('/cours');
+    await tester.pumpAndSettle();
+    _router(tester).go('/taches');
+    await tester.pumpAndSettle();
+    expect(find.text('Aucun retard, bravo !'), findsOneWidget);
   });
 
   testWidgets('Détail : « Marquer comme fait » met à jour la liste', (

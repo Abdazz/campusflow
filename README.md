@@ -29,23 +29,48 @@ flutter test         # tests de widgets
 | 3. Formulaire | `Form`, `TextFormField`, `validator`, `SnackBar`, défilant | `lib/screens/task_form_screen.dart` |
 | 4. Tablette | `LayoutBuilder` à 840 dp : liste et détail côte à côte ; rail de navigation dès 600 dp | `lib/screens/tasks_screen.dart`, `lib/screens/home_shell.dart` |
 
+## Séance 6 : « CampusFlow devient une application »
+
+| Étape | Livrable | Où |
+|---|---|---|
+| 1. Dépendances | `flutter pub add flutter_riverpod go_router`, `ProviderScope` dans `main` | `pubspec.yaml`, `lib/main.dart` |
+| 2. Routes | `GoRouter`, `ShellRoute` avec `NavigationBar` (rail dès 600 dp), paramètre `:id` | `lib/router.dart`, `lib/screens/home_shell.dart` |
+| 3. État partagé | `TachesNotifier` (ajouter, modifier, basculer par id) ; liste, détail et formulaire branchés dessus | `lib/state/taches_provider.dart` |
+| 4. Filtres | Fournisseur dérivé `tachesFiltreesProvider` : à faire, faites, en retard | `lib/state/filtres_provider.dart` |
+
+Les adresses de l'application :
+
+| Chemin | Écran | Niveau |
+|---|---|---|
+| `/` | Écran de titre | Hors barre de navigation |
+| `/taches` | Échéances (liste) | Destination 1 |
+| `/taches/nouvelle` | Formulaire de création | Écran secondaire |
+| `/taches/:id` | Détail d'une tâche (en tablette : liste et détail côte à côte) | Écran secondaire |
+| `/taches/:id/modifier` | Formulaire de modification | Écran secondaire |
+| `/cours` | Liste des cours | Destination 2 |
+| `/profil` | Compte | Destination 3 |
+
+`/taches/nouvelle` est déclarée avant `/taches/:id`, sinon « nouvelle » serait lu comme un identifiant.
+
 ## Design
 
 Les écrans reprennent le dossier de conception v1 réalisé avec Claude Design : page de tokens, logo « C-coche », maquettes haute fidélité H1 à H5 et variante A retenue pour l'écran Échéances. La police Figtree (licence OFL, `assets/fonts/OFL.txt`) est embarquée pour fonctionner hors ligne.
 
-L'état est géré avec `setState` dans `HomeShell` (Riverpod à la séance 6).
+L'état partagé (tâches, filtre actif) est géré avec Riverpod : `ref.watch` pour afficher, `ref.read` pour agir. `setState` reste pour l'état local d'un écran (champs du formulaire).
 Les modèles `Task` et `Course` viennent du package `campusflow_models` (TP de la séance 3).
 
 ## Organisation
 
 ```
 lib/
-  main.dart                 thème, locale fr_FR, écran de titre
+  main.dart                 ProviderScope, MaterialApp.router, locale fr_FR
+  router.dart               routes go_router (ShellRoute, :id)
+  state/                    TachesNotifier, filtres (fournisseurs Riverpod)
   theme/app_theme.dart      tokens du design system → ThemeData
   models/                   Task, Course (repris de la séance 3)
   data/sample_data.dart     données statiques (avant l'API)
   utils/date_labels.dart    « demain · 23:59 » avec intl
   widgets/task_tile.dart    ligne de tâche
   screens/                  titre, onglets, liste, détail, formulaire
-test/                       tests de widgets (liste, détail, formulaire, tablette)
+test/                       tests des fournisseurs et des écrans (routes, filtres, tablette)
 ```
