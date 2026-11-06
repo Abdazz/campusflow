@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +12,8 @@ Future<void> main() async {
   // Dates en français avec le package intl (« ven. 6 nov. »).
   Intl.defaultLocale = 'fr_FR';
   await initializeDateFormatting('fr_FR');
-  runApp(const CampusFlowApp());
+  // ProviderScope stocke l'état de tous les fournisseurs Riverpod.
+  runApp(const ProviderScope(child: CampusFlowApp()));
 }
 
 class CampusFlowApp extends StatelessWidget {
