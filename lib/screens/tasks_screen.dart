@@ -1,69 +1,94 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/task.dart';
+import '../state/taches_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_labels.dart';
 import '../widgets/brand.dart';
+import '../widgets/header_bar.dart';
 import '../widgets/task_tile.dart';
 import 'task_detail_screen.dart';
 
-/// Onglet Échéances, variante A « Liste par jour » retenue dans le dossier
-/// de conception : carte résumé, filtre À faire / Terminées, tâches groupées
-/// par jour, l'urgent en haut.
-///
-/// Sous 840 dp : la liste seule, un appui ouvre l'écran Détail.
-/// À partir de 840 dp : liste et détail côte à côte (LayoutBuilder).
-class TasksView extends StatefulWidget {
-  const TasksView({
-    super.key,
-    required this.tasks,
-    required this.selectedTaskId,
-    required this.onSelect,
-    required this.onChanged,
-  });
+/// Onglet Échéances (`/taches`) : en-tête « Cette semaine » et liste.
+class TasksPage extends StatelessWidget {
+  const TasksPage({super.key, this.selectedTaskId});
 
-  final List<Task> tasks;
+  /// En tablette, la tâche affichée dans le panneau de droite.
   final String? selectedTaskId;
-  final ValueChanged<Task> onSelect;
-  final ValueChanged<Task> onChanged;
 
   @override
-  State<TasksView> createState() => _TasksViewState();
-}
-
-class _TasksViewState extends State<TasksView> {
-  bool _showDone = false;
-
-  void _toggle(Task task) =>
-      widget.onChanged(task.copyWith(isDone: !task.isDone));
-
-  void _openDetail(Task task) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) =>
-            TaskDetailScreen(task: task, onChanged: widget.onChanged),
-      ),
+  Widget build(BuildContext context) {
+    return TabScaffold(
+      title: 'Cette semaine',
+      subtitle: weekRangeLabel(),
+      body: TasksView(selectedTaskId: selectedTaskId),
     );
   }
+}
+
+/// Route `/taches/:id`.
+///
+/// Sous 840 dp : l'écran Détail seul. À partir de 840 dp : la liste et le
+/// détail côte à côte, la tâche de l'adresse étant sélectionnée.
+class TaskRoutePage extends StatelessWidget {
+  const TaskRoutePage({super.key, required this.taskId});
+
+  final String taskId;
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
+      builder: (context, constraints) =>
+          constraints.maxWidth >= AppBreakpoints.expanded
+          ? TasksPage(selectedTaskId: taskId)
+          : TaskDetailScreen(taskId: taskId),
+    );
+  }
+}
+
+/// Liste des échéances, variante A « Liste par jour » retenue dans le
+/// dossier de conception : carte résumé, filtre, tâches groupées par jour,
+/// l'urgent en haut.
+///
+/// Les tâches viennent de `tachesProvider` : cocher ici met à jour le
+/// détail, le profil et les cours.
+class TasksView extends ConsumerStatefulWidget {
+  const TasksView({super.key, this.selectedTaskId});
+
+  final String? selectedTaskId;
+
+  @override
+  ConsumerState<TasksView> createState() => _TasksViewState();
+}
+
+class _TasksViewState extends ConsumerState<TasksView> {
+  bool _showDone = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final tasks = ref.watch(tachesProvider);
+    return LayoutBuilder(
       builder: (context, constraints) {
         final expanded = constraints.maxWidth >= AppBreakpoints.expanded;
         final list = _TaskList(
-          tasks: widget.tasks,
+          tasks: tasks,
           showDone: _showDone,
           onFilterChanged: (done) => setState(() => _showDone = done),
           selectedTaskId: expanded ? widget.selectedTaskId : null,
-          onTap: expanded ? widget.onSelect : _openDetail,
-          onToggleDone: _toggle,
+          // Navigation par adresse : la tâche est dans le chemin. Comme
+          // `:id` est une sous-route de `/taches`, le retour ramène à la
+          // liste.
+          onTap: (task) => context.go('/taches/${task.id}'),
+          onToggleDone: (task) =>
+              ref.read(tachesProvider.notifier).basculer(task.id),
         );
         if (!expanded) return list;
 
-        final selected = widget.tasks
-            .where((t) => t.id == widget.selectedTaskId)
-            .firstOrNull;
+        final selected = widget.selectedTaskId == null
+            ? null
+            : ref.watch(tacheProvider(widget.selectedTaskId!));
         return Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -72,12 +97,8 @@ class _TasksViewState extends State<TasksView> {
             Expanded(
               flex: 3,
               child: selected == null
-                  ? const _EmptyDetail()
-                  : _DetailPane(
-                      key: ValueKey(selected.id),
-                      task: selected,
-                      onChanged: widget.onChanged,
-                    ),
+                  ? _EmptyDetail(unknownId: widget.selectedTaskId != null)
+                  : _DetailPane(key: ValueKey(selected.id), task: selected),
             ),
           ],
         );
@@ -87,14 +108,13 @@ class _TasksViewState extends State<TasksView> {
 }
 
 /// Panneau droit en tablette : le détail et son bouton « Modifier ».
-class _DetailPane extends StatelessWidget {
-  const _DetailPane({super.key, required this.task, required this.onChanged});
+class _DetailPane extends ConsumerWidget {
+  const _DetailPane({super.key, required this.task});
 
   final Task task;
-  final ValueChanged<Task> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -103,10 +123,7 @@ class _DetailPane extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(8, 8, 12, 0),
             child: TextButton(
-              onPressed: () async {
-                final edited = await editTask(context, task);
-                if (edited != null) onChanged(edited);
-              },
+              onPressed: () => context.push('/taches/${task.id}/modifier'),
               child: const Text('Modifier'),
             ),
           ),
@@ -114,7 +131,8 @@ class _DetailPane extends StatelessWidget {
         Expanded(
           child: TaskDetailView(
             task: task,
-            onToggleDone: () => onChanged(task.copyWith(isDone: !task.isDone)),
+            onToggleDone: () =>
+                ref.read(tachesProvider.notifier).basculer(task.id),
           ),
         ),
       ],
@@ -410,7 +428,10 @@ class _EmptyList extends StatelessWidget {
 }
 
 class _EmptyDetail extends StatelessWidget {
-  const _EmptyDetail();
+  const _EmptyDetail({this.unknownId = false});
+
+  /// L'adresse désigne une tâche qui n'existe pas.
+  final bool unknownId;
 
   @override
   Widget build(BuildContext context) {
@@ -419,10 +440,16 @@ class _EmptyDetail extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.touch_app_outlined, size: 48, color: colors.outline),
+          Icon(
+            unknownId ? Icons.search_off_rounded : Icons.touch_app_outlined,
+            size: 48,
+            color: colors.outline,
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Sélectionne une échéance pour voir le détail.',
+            unknownId
+                ? 'Cette tâche n’existe pas ou plus.'
+                : 'Sélectionne une échéance pour voir le détail.',
             style: TextStyle(color: colors.onSurfaceVariant),
           ),
         ],

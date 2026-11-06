@@ -1,66 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/sample_data.dart';
 import '../models/task.dart';
+import '../state/taches_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_labels.dart';
 import '../widgets/brand.dart';
-import 'task_form_screen.dart';
 
-/// Ouvre le formulaire en mode modification ; renvoie la tâche modifiée.
-Future<Task?> editTask(BuildContext context, Task task) {
-  return Navigator.of(context).push<Task>(
-    MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (_) => TaskFormScreen(initialTask: task),
-    ),
-  );
-}
-
-/// Écran Détail sur téléphone (maquette H3).
+/// Écran Détail sur téléphone (maquette H3), route `/taches/:id`.
 ///
-/// Il garde une copie locale de la tâche pour refléter tout de suite les
-/// changements, et prévient la liste via [onChanged].
-class TaskDetailScreen extends StatefulWidget {
-  const TaskDetailScreen({
-    super.key,
-    required this.task,
-    required this.onChanged,
-  });
+/// Il ne reçoit que l'identifiant : la tâche est lue dans `tachesProvider`,
+/// donc « Marquer comme fait » se voit aussitôt dans la liste.
+class TaskDetailScreen extends ConsumerWidget {
+  const TaskDetailScreen({super.key, required this.taskId});
 
-  final Task task;
-  final ValueChanged<Task> onChanged;
+  final String taskId;
 
   @override
-  State<TaskDetailScreen> createState() => _TaskDetailScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final task = ref.watch(tacheProvider(taskId));
+    if (task == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Cette tâche n’existe pas ou plus.'),
+              const SizedBox(height: AppSpacing.md),
+              FilledButton(
+                onPressed: () => context.go('/taches'),
+                child: const Text('Retour aux échéances'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-class _TaskDetailScreenState extends State<TaskDetailScreen> {
-  late Task _task = widget.task;
-
-  void _update(Task task) {
-    setState(() => _task = task);
-    widget.onChanged(task);
-  }
-
-  Future<void> _edit() async {
-    final edited = await editTask(context, _task);
-    if (edited != null) _update(edited);
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(),
         actions: [
-          TextButton(onPressed: _edit, child: const Text('Modifier')),
+          TextButton(
+            onPressed: () => context.push('/taches/$taskId/modifier'),
+            child: const Text('Modifier'),
+          ),
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
       body: TaskDetailView(
-        task: _task,
-        onToggleDone: () => _update(_task.copyWith(isDone: !_task.isDone)),
+        task: task,
+        onToggleDone: () => ref.read(tachesProvider.notifier).basculer(taskId),
       ),
     );
   }

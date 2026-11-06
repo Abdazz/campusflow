@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-import 'screens/home_shell.dart';
-import 'screens/title_screen.dart';
+import 'router.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -16,25 +15,19 @@ Future<void> main() async {
   runApp(const ProviderScope(child: CampusFlowApp()));
 }
 
-class CampusFlowApp extends StatelessWidget {
+class CampusFlowApp extends ConsumerWidget {
   const CampusFlowApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp.router(
       title: 'CampusFlow',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       locale: const Locale('fr', 'FR'),
       supportedLocales: const [Locale('fr', 'FR')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: Builder(
-        builder: (context) => TitleScreen(
-          onStart: () => Navigator.of(context).pushReplacement(
-            MaterialPageRoute<void>(builder: (_) => const HomeShell()),
-          ),
-        ),
-      ),
+      routerConfig: ref.watch(routerProvider),
     );
   }
 }

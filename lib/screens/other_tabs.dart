@@ -1,9 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/sample_data.dart';
 import '../models/task.dart';
+import '../state/taches_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_labels.dart';
+import '../widgets/header_bar.dart';
+
+/// Destination `/cours`.
+class CoursesPage extends ConsumerWidget {
+  const CoursesPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return TabScaffold(
+      title: 'Mes cours',
+      subtitle: 'Semestre 1 · ${sampleCourses.length} modules',
+      body: CoursesView(tasks: ref.watch(tachesProvider)),
+    );
+  }
+}
+
+/// Destination `/profil`.
+class ProfilePage extends ConsumerWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return TabScaffold(
+      title: 'Profil',
+      subtitle: currentUser.program,
+      showAvatar: false,
+      body: ProfileView(tasks: ref.watch(tachesProvider)),
+    );
+  }
+}
 
 /// Onglet Cours (maquette H5) : un cours par carte, la prochaine échéance
 /// et le nombre de tâches restantes.

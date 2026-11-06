@@ -1,40 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/sample_data.dart';
 import '../models/task.dart';
+import '../state/taches_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_labels.dart';
 
-/// Formulaire « Nouvelle tâche » (maquette H4), aussi utilisé pour
-/// « Modifier ». Renvoie la [Task] via `Navigator.pop`, ou rien si
-/// l'utilisateur ferme l'écran.
+/// Formulaire « Nouvelle tâche » (maquette H4, route `/taches/nouvelle`),
+/// aussi utilisé pour « Modifier » (`/taches/:id/modifier`).
+///
+/// À l'enregistrement, il écrit directement dans `tachesProvider` : la
+/// liste et le détail se mettent à jour sans valeur de retour.
 ///
 /// Job story 1 : enregistrer une échéance en moins de 3 appuis, d'où le
 /// cours, la date et le rappel pré-remplis.
-class TaskFormScreen extends StatefulWidget {
-  const TaskFormScreen({super.key, this.initialTask});
+class TaskFormScreen extends ConsumerStatefulWidget {
+  const TaskFormScreen({super.key, this.taskId});
 
-  final Task? initialTask;
+  /// Tâche à modifier ; `null` pour une création.
+  final String? taskId;
 
   @override
-  State<TaskFormScreen> createState() => _TaskFormScreenState();
+  ConsumerState<TaskFormScreen> createState() => _TaskFormScreenState();
 }
 
-class _TaskFormScreenState extends State<TaskFormScreen> {
+class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final _title = TextEditingController(text: widget.initialTask?.title);
-  late final _description = TextEditingController(
-    text: widget.initialTask?.description,
-  );
+
+  /// Lue une seule fois (`ref.read`) : le formulaire travaille sur sa copie.
+  late final Task? _initial = widget.taskId == null
+      ? null
+      : ref.read(tacheProvider(widget.taskId!));
+
+  late final _title = TextEditingController(text: _initial?.title);
+  late final _description = TextEditingController(text: _initial?.description);
   final _dateText = TextEditingController();
   final _timeText = TextEditingController();
 
-  late String _courseId =
-      widget.initialTask?.courseId ?? sampleCourses.first.id;
-  late Reminder _reminder = widget.initialTask?.reminder ?? Reminder.dayBefore;
-  late DateTime _dueDate = widget.initialTask?.dueDate ?? _defaultDueDate();
+  late String _courseId = _initial?.courseId ?? sampleCourses.first.id;
+  late Reminder _reminder = _initial?.reminder ?? Reminder.dayBefore;
+  late DateTime _dueDate = _initial?.dueDate ?? _defaultDueDate();
 
-  bool get _isEditing => widget.initialTask != null;
+  bool get _isEditing => _initial != null;
 
   /// Par défaut : demain à 23 h 59.
   static DateTime _defaultDueDate() {
@@ -110,7 +119,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
 
     final description = _description.text.trim();
     final base =
-        widget.initialTask ??
+        _initial ??
         Task(
           id: 't${DateTime.now().microsecondsSinceEpoch}',
           title: '',
@@ -127,6 +136,9 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       reminder: _reminder,
     );
 
+    final taches = ref.read(tachesProvider.notifier);
+    _isEditing ? taches.modifier(task) : taches.ajouter(task);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -136,7 +148,13 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         ),
       ),
     );
-    Navigator.of(context).pop(task);
+    // En tablette, la nouvelle tâche s'ouvre dans le panneau de détail.
+    final wide = MediaQuery.sizeOf(context).width >= AppBreakpoints.expanded;
+    if (!_isEditing && wide) {
+      context.go('/taches/${task.id}');
+    } else {
+      context.pop();
+    }
   }
 
   @override
@@ -150,7 +168,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           tooltip: 'Fermer sans enregistrer',
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
         titleSpacing: 0,
         title: Text(_isEditing ? 'Modifier la tâche' : 'Nouvelle tâche'),
