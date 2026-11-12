@@ -40,3 +40,9 @@ class ApiException implements Exception {
   @override
   String toString() => 'ApiException($statusCode) : $message';
 }
+
+/// Message à afficher pour une erreur venue du Repository.
+String messagePour(Object erreur) => switch (erreur) {
+  ApiException(:final message) => message,
+  _ => 'Une erreur inattendue est survenue.',
+};

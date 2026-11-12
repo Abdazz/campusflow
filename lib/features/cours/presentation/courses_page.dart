@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:campusflow/core/date_labels.dart';
 import 'package:campusflow/core/theme.dart';
+import 'package:campusflow/core/widgets/async_vue.dart';
 import 'package:campusflow/core/widgets/header_bar.dart';
 import 'package:campusflow/features/cours/data/cours_catalogue.dart';
 import 'package:campusflow/features/taches/application/taches_provider.dart';
@@ -18,7 +19,12 @@ class CoursesPage extends ConsumerWidget {
     return TabScaffold(
       title: 'Mes cours',
       subtitle: 'Semestre 1 · ${sampleCourses.length} modules',
-      body: CoursesView(tasks: ref.watch(tachesProvider)),
+      body: AsyncVue(
+        valeur: ref.watch(tachesProvider),
+        chargement: 'Chargement des cours',
+        onRetry: () => ref.invalidate(tachesProvider),
+        donnee: (taches) => CoursesView(tasks: taches),
+      ),
     );
   }
 }

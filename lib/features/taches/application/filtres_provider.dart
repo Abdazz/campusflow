@@ -27,7 +27,8 @@ final filtreProvider = NotifierProvider<FiltreNotifier, FiltreTaches>(
 final tachesFiltreesProvider = Provider<List<Task>>((ref) {
   final filtre = ref.watch(filtreProvider);
   final now = ref.watch(horlogeProvider)();
-  return ref.watch(tachesProvider).where((t) => filtre.garde(t, now)).toList()
+  final taches = ref.watch(tachesProvider).value ?? const <Task>[];
+  return taches.where((t) => filtre.garde(t, now)).toList()
     // Les terminées : la plus récente d'abord ; sinon la plus proche.
     ..sort(
       (a, b) => filtre == FiltreTaches.faites
@@ -38,7 +39,7 @@ final tachesFiltreesProvider = Provider<List<Task>>((ref) {
 
 /// Nombre de tâches par filtre, pour les libellés « À faire · 3 ».
 final compteursProvider = Provider<Map<FiltreTaches, int>>((ref) {
-  final taches = ref.watch(tachesProvider);
+  final taches = ref.watch(tachesProvider).value ?? const <Task>[];
   final now = ref.watch(horlogeProvider)();
   return {
     for (final filtre in FiltreTaches.values)

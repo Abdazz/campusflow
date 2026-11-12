@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:campusflow/core/api_exception.dart';
 import 'package:campusflow/core/date_labels.dart';
 import 'package:campusflow/core/theme.dart';
+import 'package:campusflow/core/widgets/async_vue.dart';
 import 'package:campusflow/core/widgets/brand.dart';
 import 'package:campusflow/core/widgets/header_bar.dart';
 import 'package:campusflow/features/taches/application/filtres_provider.dart';
 import 'package:campusflow/features/taches/application/taches_provider.dart';
 import 'package:campusflow/features/taches/domain/task.dart';
+import 'package:campusflow/features/taches/presentation/actions_taches.dart';
 import 'package:campusflow/features/taches/presentation/task_detail_screen.dart';
 import 'package:campusflow/features/taches/presentation/task_tile.dart';
 
@@ -65,27 +68,50 @@ class TasksView extends ConsumerStatefulWidget {
 }
 
 class _TasksViewState extends ConsumerState<TasksView> {
+  /// Tirer pour rafraîchir : `GET /taches` à nouveau.
+  Future<void> _rafraichir() async {
+    final messages = ScaffoldMessenger.of(context);
+    try {
+      ref.invalidate(tachesProvider);
+      await ref.read(tachesProvider.future);
+    } on ApiException catch (e) {
+      messages.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Trois états : chargement, erreur (avec « Réessayer »), donnée.
+    return AsyncVue(
+      valeur: ref.watch(tachesProvider),
+      chargement: 'Chargement des échéances',
+      onRetry: () => ref.invalidate(tachesProvider),
+      donnee: (_) => _contenu(context),
+    );
+  }
+
+  Widget _contenu(BuildContext context) {
     // Le filtre est un état partagé : il vit dans filtreProvider, plus dans
     // un booléen local de l'écran.
     final filtre = ref.watch(filtreProvider);
     return LayoutBuilder(
       builder: (context, constraints) {
         final expanded = constraints.maxWidth >= AppBreakpoints.expanded;
-        final list = _TaskList(
-          visible: ref.watch(tachesFiltreesProvider),
-          counts: ref.watch(compteursProvider),
-          filtre: filtre,
-          now: ref.watch(horlogeProvider)(),
-          onFilterChanged: ref.read(filtreProvider.notifier).choisir,
-          selectedTaskId: expanded ? widget.selectedTaskId : null,
-          // Navigation par adresse : la tâche est dans le chemin. Comme
-          // `:id` est une sous-route de `/taches`, le retour ramène à la
-          // liste.
-          onTap: (task) => context.go('/taches/${task.id}'),
-          onToggleDone: (task) =>
-              ref.read(tachesProvider.notifier).basculer(task.id),
+        final list = RefreshIndicator(
+          onRefresh: _rafraichir,
+          child: _TaskList(
+            visible: ref.watch(tachesFiltreesProvider),
+            counts: ref.watch(compteursProvider),
+            filtre: filtre,
+            now: ref.watch(horlogeProvider)(),
+            onFilterChanged: ref.read(filtreProvider.notifier).choisir,
+            selectedTaskId: expanded ? widget.selectedTaskId : null,
+            // Navigation par adresse : la tâche est dans le chemin. Comme
+            // `:id` est une sous-route de `/taches`, le retour ramène à la
+            // liste.
+            onTap: (task) => context.go('/taches/${task.id}'),
+            onToggleDone: (task) => basculerTache(context, ref, task),
+          ),
         );
         if (!expanded) return list;
 
@@ -110,7 +136,7 @@ class _TasksViewState extends ConsumerState<TasksView> {
   }
 }
 
-/// Panneau droit en tablette : le détail et son bouton « Modifier ».
+/// Panneau droit en tablette : le détail, « Modifier » et « Supprimer ».
 class _DetailPane extends ConsumerWidget {
   const _DetailPane({super.key, required this.task});
 
@@ -121,21 +147,27 @@ class _DetailPane extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 12, 0),
-            child: TextButton(
-              onPressed: () => context.push('/taches/${task.id}/modifier'),
-              child: const Text('Modifier'),
-            ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 12, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                onPressed: () => supprimerTache(context, ref, task),
+                tooltip: 'Supprimer la tâche',
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+              TextButton(
+                onPressed: () => context.push('/taches/${task.id}/modifier'),
+                child: const Text('Modifier'),
+              ),
+            ],
           ),
         ),
         Expanded(
           child: TaskDetailView(
             task: task,
-            onToggleDone: () =>
-                ref.read(tachesProvider.notifier).basculer(task.id),
+            onToggleDone: () => basculerTache(context, ref, task),
           ),
         ),
       ],
@@ -212,6 +244,9 @@ class _TaskList extends StatelessWidget {
     // Résumé et filtre défilent avec la liste : rien n'est figé en hauteur.
     const leading = 2;
     return ListView.builder(
+      // Toujours défilable : le geste « tirer pour rafraîchir » marche
+      // même quand la liste est courte.
+      physics: const AlwaysScrollableScrollPhysics(),
       // Marge basse pour ne pas masquer la dernière carte sous le bouton
       // flottant.
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 104),

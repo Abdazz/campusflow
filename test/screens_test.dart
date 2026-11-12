@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:campusflow/core/router.dart';
-import 'package:campusflow/features/taches/application/taches_provider.dart';
+import 'package:campusflow/features/taches/data/fake_task_repository.dart';
+import 'package:campusflow/features/taches/data/task_repository_provider.dart';
 import 'package:campusflow/features/taches/domain/task.dart';
 import 'package:campusflow/features/taches/presentation/task_detail_screen.dart';
 import 'package:campusflow/features/taches/presentation/task_form_screen.dart';
@@ -36,10 +37,14 @@ final _tasks = [
   ),
 ];
 
+/// Le Repository de test : en mémoire, sans latence ni réseau.
+late FakeTaskRepository _repo;
+
 /// L'application complète (routeur et Riverpod), ouverte à [location].
+/// Seul le Repository est remplacé : Notifier, écrans et routes sont réels.
 Widget _app({String location = '/taches'}) => ProviderScope(
   overrides: [
-    tachesProvider.overrideWith(() => TachesNotifier(_tasks)),
+    taskRepositoryProvider.overrideWithValue(_repo),
     routerProvider.overrideWith((ref) {
       final router = creerRouter(initialLocation: location);
       ref.onDispose(router.dispose);
@@ -48,6 +53,12 @@ Widget _app({String location = '/taches'}) => ProviderScope(
   ],
   child: const CampusFlowApp(),
 );
+
+/// Ouvre l'application et attend la fin du `GET /taches`.
+Future<void> _ouvrir(WidgetTester tester, {String location = '/taches'}) async {
+  await tester.pumpWidget(_app(location: location));
+  await tester.pumpAndSettle();
+}
 
 void _setScreenSize(WidgetTester tester, Size size) {
   tester.view.physicalSize = size;
@@ -60,12 +71,15 @@ GoRouter _router(WidgetTester tester) =>
 
 void main() {
   setUpAll(() => initializeDateFormatting('fr_FR'));
+  setUp(
+    () => _repo = FakeTaskRepository(initiales: _tasks, latence: Duration.zero),
+  );
 
   testWidgets('Échéances : résumé, liste, bouton flottant et navigation', (
     tester,
   ) async {
     _setScreenSize(tester, const Size(390, 844));
-    await tester.pumpWidget(_app());
+    await _ouvrir(tester);
 
     expect(find.text('Cette semaine'), findsOneWidget);
     expect(find.text('2 échéances à venir'), findsOneWidget);
@@ -81,7 +95,7 @@ void main() {
     tester,
   ) async {
     _setScreenSize(tester, const Size(390, 844));
-    await tester.pumpWidget(_app());
+    await _ouvrir(tester);
 
     await tester.tap(find.text('Cours'));
     await tester.pumpAndSettle();
@@ -98,8 +112,7 @@ void main() {
     tester,
   ) async {
     _setScreenSize(tester, const Size(390, 844));
-    await tester.pumpWidget(_app(location: '/taches/a'));
-    await tester.pumpAndSettle();
+    await _ouvrir(tester, location: '/taches/a');
 
     expect(find.byType(TaskDetailScreen), findsOneWidget);
     expect(find.text('Modèles et tests'), findsOneWidget);
@@ -118,10 +131,10 @@ void main() {
     tester,
   ) async {
     _setScreenSize(tester, const Size(390, 844));
-    await tester.pumpWidget(_app());
+    await _ouvrir(tester);
 
     await tester.tap(find.byTooltip('Marquer Rendu TP Dart comme fait'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('1 échéance à venir'), findsOneWidget);
     expect(find.text('Rendu TP Dart'), findsNothing);
 
@@ -147,7 +160,7 @@ void main() {
 
   testWidgets('Filtres : à faire, faites, en retard', (tester) async {
     _setScreenSize(tester, const Size(360, 780));
-    await tester.pumpWidget(_app());
+    await _ouvrir(tester);
 
     expect(find.text('À faire · 2'), findsOneWidget);
     expect(find.text('Faites · 1'), findsOneWidget);
@@ -174,7 +187,7 @@ void main() {
     tester,
   ) async {
     _setScreenSize(tester, const Size(390, 844));
-    await tester.pumpWidget(_app());
+    await _ouvrir(tester);
 
     await tester.tap(find.text('Rendu TP Dart'));
     await tester.pumpAndSettle();
@@ -183,7 +196,7 @@ void main() {
     expect(find.text('Demain'), findsOneWidget);
 
     await tester.tap(find.text('Marquer comme fait'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Marquer comme à faire'), findsOneWidget);
     expect(find.text('Terminée'), findsOneWidget);
 
@@ -196,7 +209,7 @@ void main() {
     tester,
   ) async {
     _setScreenSize(tester, const Size(390, 844));
-    await tester.pumpWidget(_app());
+    await _ouvrir(tester);
 
     await tester.tap(find.text('Nouvelle tâche'));
     await tester.pumpAndSettle();
@@ -223,8 +236,7 @@ void main() {
     tester,
   ) async {
     _setScreenSize(tester, const Size(390, 844));
-    await tester.pumpWidget(_app(location: '/taches/b'));
-    await tester.pumpAndSettle();
+    await _ouvrir(tester, location: '/taches/b');
 
     await tester.tap(find.text('Modifier'));
     await tester.pumpAndSettle();
@@ -246,7 +258,7 @@ void main() {
     tester,
   ) async {
     _setScreenSize(tester, const Size(1280, 800));
-    await tester.pumpWidget(_app());
+    await _ouvrir(tester);
 
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
@@ -272,7 +284,90 @@ void main() {
     expect(find.text('Examen UX'), findsNWidgets(2));
 
     await tester.tap(find.text('Marquer comme fait'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('1 échéance à venir'), findsOneWidget);
+  });
+
+  group('Séance 7 : liste connectée', () {
+    testWidgets('Trois états : chargement, erreur puis « Réessayer »', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      _repo = FakeTaskRepository(
+        initiales: _tasks,
+        latence: const Duration(milliseconds: 300),
+      )..enPanne = true;
+      await tester.pumpWidget(_app());
+
+      // Chargement : indicateur, pas encore de liste.
+      expect(find.bySemanticsLabel('Chargement des échéances'), findsOneWidget);
+      await tester.pumpAndSettle();
+
+      // Erreur : message et bouton « Réessayer ».
+      expect(
+        find.text('Impossible de joindre le serveur. Vérifie ta connexion.'),
+        findsOneWidget,
+      );
+      _repo.enPanne = false;
+      await tester.tap(find.text('Réessayer'));
+      await tester.pumpAndSettle();
+
+      // Donnée.
+      expect(find.text('Rendu TP Dart'), findsOneWidget);
+      expect(_repo.appels, 2);
+    });
+
+    testWidgets('Échec d’un PATCH : SnackBar, la liste reste affichée', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      await _ouvrir(tester);
+
+      _repo.enPanne = true;
+      await tester.tap(find.byTooltip('Marquer Rendu TP Dart comme fait'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Rendu TP Dart'), findsOneWidget);
+      expect(find.text('2 échéances à venir'), findsOneWidget);
+    });
+
+    testWidgets('Supprimer depuis le détail : confirmation puis DELETE', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      await _ouvrir(tester, location: '/taches/a');
+
+      await tester.tap(find.byTooltip('Supprimer la tâche'));
+      await tester.pumpAndSettle();
+      expect(find.text('Supprimer la tâche ?'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Supprimer'));
+      await tester.pumpAndSettle();
+
+      expect(_router(tester).state.uri.path, '/taches');
+      expect(find.text('« Rendu TP Dart » supprimée'), findsOneWidget);
+      expect(find.text('1 échéance à venir'), findsOneWidget);
+      expect((await _repo.lister()).map((t) => t.id), isNot(contains('a')));
+    });
+
+    testWidgets('Ajouter : POST, la tâche reçoit l’id du serveur', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      await _ouvrir(tester);
+
+      await tester.tap(find.text('Nouvelle tâche'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextFormField).first, 'Projet ML');
+      final save = find.text('Enregistrer');
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+
+      final enregistree = (await _repo.lister()).last;
+      expect(enregistree.title, 'Projet ML');
+      expect(enregistree.id, isNot(isEmpty));
+      expect(find.text('Projet ML'), findsOneWidget);
+    });
   });
 }

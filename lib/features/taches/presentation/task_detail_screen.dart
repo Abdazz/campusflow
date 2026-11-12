@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import 'package:campusflow/core/date_labels.dart';
 import 'package:campusflow/core/theme.dart';
+import 'package:campusflow/core/widgets/async_vue.dart';
 import 'package:campusflow/core/widgets/brand.dart';
 import 'package:campusflow/features/cours/data/cours_catalogue.dart';
 import 'package:campusflow/features/taches/application/taches_provider.dart';
 import 'package:campusflow/features/taches/domain/task.dart';
 import 'package:campusflow/features/taches/domain/task_state.dart';
+import 'package:campusflow/features/taches/presentation/actions_taches.dart';
 
 /// Écran Détail sur téléphone (maquette H3), route `/taches/:id`.
 ///
@@ -23,37 +25,57 @@ class TaskDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final task = ref.watch(tacheProvider(taskId));
     if (task == null) {
+      // Lien profond : la liste peut être en cours de chargement ou en
+      // erreur ; sinon, la tâche n'existe pas (ou plus) sur le serveur.
       return Scaffold(
         appBar: AppBar(),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Cette tâche n’existe pas ou plus.'),
-              const SizedBox(height: AppSpacing.md),
-              FilledButton(
-                onPressed: () => context.go('/taches'),
-                child: const Text('Retour aux échéances'),
-              ),
-            ],
+        body: AsyncVue(
+          valeur: ref.watch(tachesProvider),
+          chargement: 'Chargement de la tâche',
+          onRetry: () => ref.invalidate(tachesProvider),
+          donnee: (_) => Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Cette tâche n’existe pas ou plus.'),
+                const SizedBox(height: AppSpacing.md),
+                FilledButton(
+                  onPressed: () => context.go('/taches'),
+                  child: const Text('Retour aux échéances'),
+                ),
+              ],
+            ),
           ),
         ),
       );
     }
 
+    final enCours = ref.watch(tachesProvider).isLoading;
     return Scaffold(
       appBar: AppBar(
         actions: [
+          IconButton(
+            onPressed: () => supprimerTache(context, ref, task),
+            tooltip: 'Supprimer la tâche',
+            icon: const Icon(Icons.delete_outline_rounded),
+          ),
           TextButton(
             onPressed: () => context.push('/taches/$taskId/modifier'),
             child: const Text('Modifier'),
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
+        // L'action part au serveur : fine barre sous la barre d'application.
+        bottom: enCours
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(3),
+                child: LinearProgressIndicator(minHeight: 3),
+              )
+            : null,
       ),
       body: TaskDetailView(
         task: task,
-        onToggleDone: () => ref.read(tachesProvider.notifier).basculer(taskId),
+        onToggleDone: () => basculerTache(context, ref, task),
       ),
     );
   }

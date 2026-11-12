@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:campusflow/core/api_exception.dart';
 import 'package:campusflow/core/date_labels.dart';
 import 'package:campusflow/core/theme.dart';
 import 'package:campusflow/features/cours/data/cours_catalogue.dart';
@@ -11,8 +12,8 @@ import 'package:campusflow/features/taches/domain/task.dart';
 /// Formulaire « Nouvelle tâche » (maquette H4, route `/taches/nouvelle`),
 /// aussi utilisé pour « Modifier » (`/taches/:id/modifier`).
 ///
-/// À l'enregistrement, il écrit directement dans `tachesProvider` : la
-/// liste et le détail se mettent à jour sans valeur de retour.
+/// À l'enregistrement, il passe par `tachesProvider` (POST ou PATCH sur le
+/// serveur) : la liste et le détail se mettent à jour sans valeur de retour.
 ///
 /// Job story 1 : enregistrer une échéance en moins de 3 appuis, d'où le
 /// cours, la date et le rappel pré-remplis.
@@ -114,46 +115,52 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
     });
   }
 
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
+  /// Vrai pendant l'envoi au serveur : le bouton est désactivé.
+  bool _enregistrement = false;
+
+  Future<void> _save() async {
+    if (_enregistrement || !_formKey.currentState!.validate()) return;
 
     final description = _description.text.trim();
-    final base =
-        _initial ??
-        Task(
-          id: 't${DateTime.now().microsecondsSinceEpoch}',
-          title: '',
-          courseId: _courseId,
-          dueDate: _dueDate,
-        );
     final task = Task(
-      id: base.id,
+      // Création : l'identifiant est attribué par le serveur (POST).
+      id: _initial?.id ?? '',
       title: _title.text.trim(),
       courseId: _courseId,
       dueDate: _dueDate,
       description: description.isEmpty ? null : description,
-      isDone: base.isDone,
+      isDone: _initial?.isDone ?? false,
       reminder: _reminder,
     );
 
+    setState(() => _enregistrement = true);
+    final messages = ScaffoldMessenger.of(context);
     final taches = ref.read(tachesProvider.notifier);
-    _isEditing ? taches.modifier(task) : taches.ajouter(task);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isEditing
-              ? '« ${task.title} » modifiée'
-              : '« ${task.title} » ajoutée aux échéances',
+    try {
+      final enregistree = _isEditing
+          ? await taches.modifier(task)
+          : await taches.ajouter(task);
+      if (!mounted) return;
+      messages.showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEditing
+                ? '« ${enregistree.title} » modifiée'
+                : '« ${enregistree.title} » ajoutée aux échéances',
+          ),
         ),
-      ),
-    );
-    // En tablette, la nouvelle tâche s'ouvre dans le panneau de détail.
-    final wide = MediaQuery.sizeOf(context).width >= AppBreakpoints.expanded;
-    if (!_isEditing && wide) {
-      context.go('/taches/${task.id}');
-    } else {
-      context.pop();
+      );
+      // En tablette, la nouvelle tâche s'ouvre dans le panneau de détail.
+      final wide = MediaQuery.sizeOf(context).width >= AppBreakpoints.expanded;
+      if (!_isEditing && wide) {
+        context.go('/taches/${enregistree.id}');
+      } else {
+        context.pop();
+      }
+    } on ApiException catch (e) {
+      // Le formulaire reste ouvert : rien n'est perdu, on peut réessayer.
+      messages.showSnackBar(SnackBar(content: Text(e.message)));
+      if (mounted) setState(() => _enregistrement = false);
     }
   }
 
@@ -306,8 +313,16 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                       const SizedBox(height: 10),
                     ],
                     FilledButton(
-                      onPressed: _save,
-                      child: const Text('Enregistrer'),
+                      onPressed: _enregistrement ? null : _save,
+                      child: _enregistrement
+                          ? const SizedBox.square(
+                              dimension: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                semanticsLabel: 'Enregistrement',
+                              ),
+                            )
+                          : const Text('Enregistrer'),
                     ),
                   ],
                 ),
