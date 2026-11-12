@@ -75,7 +75,10 @@ class _TasksViewState extends ConsumerState<TasksView> {
       ref.invalidate(tachesProvider);
       await ref.read(tachesProvider.future);
     } on ApiException catch (e) {
-      messages.showSnackBar(SnackBar(content: Text(e.message)));
+      // 401 : l'écran de connexion explique déjà « Session expirée ».
+      if (!e.nonAuthentifie) {
+        messages.showSnackBar(SnackBar(content: Text(e.message)));
+      }
     }
   }
 

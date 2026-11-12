@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:campusflow/core/api_exception.dart';
+import 'package:campusflow/features/auth/application/auth_provider.dart';
 import 'package:campusflow/features/taches/data/task_repository_provider.dart';
 import 'package:campusflow/features/taches/domain/task.dart';
 import 'package:campusflow/features/taches/domain/task_repository.dart';
@@ -16,9 +17,14 @@ final horlogeProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 class TachesNotifier extends AsyncNotifier<List<Task>> {
   TaskRepository get _repository => ref.read(taskRepositoryProvider);
 
-  /// Premier chargement : `GET /taches`.
+  /// Premier chargement : `GET /taches`, une fois l'utilisateur connecté.
+  /// La liste se recharge à chaque connexion et se vide à la déconnexion.
   @override
-  Future<List<Task>> build() => ref.watch(taskRepositoryProvider).lister();
+  Future<List<Task>> build() async {
+    final utilisateur = await ref.watch(authProvider.selectAsync((u) => u?.id));
+    if (utilisateur == null) return const [];
+    return ref.watch(taskRepositoryProvider).lister();
+  }
 
   /// `POST /taches` ; renvoie la tâche avec l'identifiant du serveur.
   Future<Task> ajouter(Task tache) => _action(

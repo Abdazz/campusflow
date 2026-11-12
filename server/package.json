@@ -2,9 +2,10 @@
   "name": "campusflow-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Serveur simulé de CampusFlow (séance 7) : json-server sur db.json",
+  "description": "Serveur simulé de CampusFlow (séance 7) : json-server sur db.json, faux /login avec jeton",
   "scripts": {
-    "start": "json-server --watch db.json --port 3000 --host 0.0.0.0",
+    "start": "node server.js",
+    "brut": "json-server --watch db.json --port 3000 --host 0.0.0.0",
     "reset": "node seed.js"
   },
   "devDependencies": {

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:campusflow/features/profil/data/profil_demo.dart';
+import 'package:campusflow/features/auth/application/auth_provider.dart';
 
 /// Page d'un onglet : grand en-tête (titre, sous-titre, avatar) et contenu.
 class TabScaffold extends StatelessWidget {
@@ -33,8 +34,9 @@ class TabScaffold extends StatelessWidget {
   }
 }
 
-/// En-tête des onglets : grand titre, sous-titre et avatar.
-class HeaderBar extends StatelessWidget implements PreferredSizeWidget {
+/// En-tête des onglets : grand titre, sous-titre et avatar de l'étudiant
+/// connecté.
+class HeaderBar extends ConsumerWidget implements PreferredSizeWidget {
   const HeaderBar({
     super.key,
     required this.title,
@@ -50,9 +52,10 @@ class HeaderBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(88);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final utilisateur = ref.watch(authProvider).value;
     return AppBar(
       toolbarHeight: 88,
       titleSpacing: 20,
@@ -73,11 +76,11 @@ class HeaderBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        if (onAvatarTap != null)
+        if (onAvatarTap != null && utilisateur != null)
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Tooltip(
-              message: 'Profil de ${currentUser.name}',
+              message: 'Profil de ${utilisateur.nom}',
               child: Material(
                 color: colors.primaryContainer,
                 shape: const CircleBorder(),
@@ -89,7 +92,7 @@ class HeaderBar extends StatelessWidget implements PreferredSizeWidget {
                     height: 48,
                     child: Center(
                       child: Text(
-                        currentUser.initials,
+                        utilisateur.initiales,
                         style: theme.textTheme.labelLarge?.copyWith(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,

@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:campusflow/core/widgets/async_vue.dart';
 import 'package:campusflow/core/widgets/header_bar.dart';
 import 'package:campusflow/features/cours/data/cours_catalogue.dart';
-import 'package:campusflow/features/profil/data/profil_demo.dart';
+import 'package:campusflow/core/theme.dart';
+import 'package:campusflow/features/auth/application/auth_provider.dart';
+import 'package:campusflow/features/auth/domain/utilisateur.dart';
 import 'package:campusflow/features/taches/application/taches_provider.dart';
 import 'package:campusflow/features/taches/domain/task.dart';
 
@@ -14,25 +16,40 @@ class ProfilePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final utilisateur = ref.watch(authProvider).value;
+    // Sans session, le routeur redirige vers /login.
+    if (utilisateur == null) return const SizedBox.shrink();
     return TabScaffold(
       title: 'Profil',
-      subtitle: currentUser.program,
+      subtitle: utilisateur.programme,
       showAvatar: false,
       body: AsyncVue(
         valeur: ref.watch(tachesProvider),
         chargement: 'Chargement du profil',
         onRetry: () => ref.invalidate(tachesProvider),
-        donnee: (taches) => ProfileView(tasks: taches),
+        donnee: (taches) => ProfileView(
+          utilisateur: utilisateur,
+          tasks: taches,
+          // Le jeton est effacé ; le routeur ramène à l'écran de connexion.
+          onDeconnexion: ref.read(authProvider.notifier).deconnecter,
+        ),
       ),
     );
   }
 }
 
-/// Onglet Profil : la persona du dossier de conception et ses chiffres.
+/// Onglet Profil : l'étudiant connecté, ses chiffres et la déconnexion.
 class ProfileView extends StatelessWidget {
-  const ProfileView({super.key, required this.tasks});
+  const ProfileView({
+    super.key,
+    required this.utilisateur,
+    required this.tasks,
+    required this.onDeconnexion,
+  });
 
+  final Utilisateur utilisateur;
   final List<Task> tasks;
+  final VoidCallback onDeconnexion;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +70,7 @@ class ProfileView extends StatelessWidget {
                   radius: 36,
                   backgroundColor: colors.primaryContainer,
                   child: Text(
-                    currentUser.initials,
+                    utilisateur.initiales,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: colors.onPrimaryContainer,
                     ),
@@ -64,13 +81,10 @@ class ProfileView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        currentUser.name,
-                        style: theme.textTheme.titleMedium,
-                      ),
+                      Text(utilisateur.nom, style: theme.textTheme.titleMedium),
                       const SizedBox(height: 4),
                       Text(
-                        currentUser.email,
+                        utilisateur.email,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colors.onSurfaceVariant,
                         ),
@@ -91,6 +105,12 @@ class ProfileView extends StatelessWidget {
             const SizedBox(width: 12),
             _Stat(value: sampleCourses.length, label: 'Cours'),
           ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        OutlinedButton.icon(
+          onPressed: onDeconnexion,
+          icon: const Icon(Icons.logout_rounded),
+          label: const Text('Se déconnecter'),
         ),
       ],
     );

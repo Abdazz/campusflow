@@ -159,7 +159,10 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       }
     } on ApiException catch (e) {
       // Le formulaire reste ouvert : rien n'est perdu, on peut réessayer.
-      messages.showSnackBar(SnackBar(content: Text(e.message)));
+      // 401 : l'écran de connexion explique déjà « Session expirée ».
+      if (!e.nonAuthentifie) {
+        messages.showSnackBar(SnackBar(content: Text(e.message)));
+      }
       if (mounted) setState(() => _enregistrement = false);
     }
   }

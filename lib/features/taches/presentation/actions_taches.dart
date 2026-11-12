@@ -17,7 +17,10 @@ Future<bool> executerAction(
     await action();
     return true;
   } on ApiException catch (e) {
-    messages.showSnackBar(SnackBar(content: Text(e.message)));
+    // 401 : l'écran de connexion explique déjà « Session expirée ».
+    if (!e.nonAuthentifie) {
+      messages.showSnackBar(SnackBar(content: Text(e.message)));
+    }
     return false;
   }
 }

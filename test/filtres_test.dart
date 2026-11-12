@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:campusflow/core/api_exception.dart';
+import 'package:campusflow/core/stockage_securise.dart';
+import 'package:campusflow/features/auth/application/auth_provider.dart';
+import 'package:campusflow/features/auth/data/fake_auth_repository.dart';
 import 'package:campusflow/features/taches/application/filtres_provider.dart';
 import 'package:campusflow/features/taches/application/taches_provider.dart';
 import 'package:campusflow/features/taches/data/fake_task_repository.dart';
@@ -6,6 +11,12 @@ import 'package:campusflow/features/taches/data/task_repository_provider.dart';
 import 'package:campusflow/features/taches/domain/task.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// Une session ouverte : jeton et profil dans le stockage (en mémoire).
+StockageMemoire _session() => StockageMemoire({
+  cleJeton: 'jeton-de-test',
+  cleUtilisateur: jsonEncode(utilisateurDemo.toJson()),
+});
 
 /// Les fournisseurs se testent sans afficher de widget ni appeler de
 /// serveur : le Repository est remplacé par sa version en mémoire.
@@ -43,6 +54,7 @@ void main() {
       overrides: [
         horlogeProvider.overrideWithValue(() => now),
         taskRepositoryProvider.overrideWithValue(repo),
+        stockageSecuriseProvider.overrideWithValue(_session()),
       ],
     );
     addTearDown(container.dispose);
@@ -93,7 +105,10 @@ void main() {
     test('build : chargement puis donnée venue du Repository', () async {
       repo = FakeTaskRepository(latence: Duration.zero, initiales: const []);
       final c = ProviderContainer(
-        overrides: [taskRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          taskRepositoryProvider.overrideWithValue(repo),
+          stockageSecuriseProvider.overrideWithValue(_session()),
+        ],
       );
       addTearDown(c.dispose);
 
@@ -153,7 +168,10 @@ void main() {
     test('Erreur au chargement, puis rechargement réussi', () async {
       repo = FakeTaskRepository(latence: Duration.zero)..enPanne = true;
       final c = ProviderContainer(
-        overrides: [taskRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          taskRepositoryProvider.overrideWithValue(repo),
+          stockageSecuriseProvider.overrideWithValue(_session()),
+        ],
       );
       addTearDown(c.dispose);
 

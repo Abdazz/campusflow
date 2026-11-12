@@ -1,0 +1,103 @@
+import 'package:flutter/material.dart';
+
+import 'package:campusflow/core/theme.dart';
+import 'package:campusflow/core/widgets/brand.dart';
+
+/// Mise en page de la maquette « Connexion » : bandeau bleu avec le logo,
+/// feuille blanche avec le contenu. Utilisée par l'écran de titre et par
+/// l'écran de connexion.
+class EcranMarque extends StatelessWidget {
+  const EcranMarque({super.key, required this.feuille});
+
+  /// Contenu de la feuille blanche.
+  final Widget feuille;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Scaffold(
+      backgroundColor: colors.primary,
+      body: SafeArea(
+        bottom: false,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.xl * 2,
+                        AppSpacing.lg,
+                        AppSpacing.xl * 1.5,
+                      ),
+                      child: Column(
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x730A0E32),
+                                  blurRadius: 30,
+                                  offset: Offset(0, 18),
+                                ),
+                              ],
+                            ),
+                            child: const CampusLogo(size: 96, onPrimary: true),
+                          ),
+                          const SizedBox(height: AppSpacing.screen),
+                          const Wordmark(onPrimary: true),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            'Toutes tes échéances, au même endroit.',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colors.primaryContainer,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                        ),
+                        child: SafeArea(
+                          top: false,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 480),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  AppSpacing.lg,
+                                  AppSpacing.xl,
+                                  AppSpacing.lg,
+                                  AppSpacing.lg,
+                                ),
+                                child: feuille,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

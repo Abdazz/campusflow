@@ -1,16 +1,25 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:campusflow/core/dio_provider.dart';
 import 'package:campusflow/core/router.dart';
+import 'package:campusflow/core/stockage_securise.dart';
+import 'package:campusflow/features/auth/application/auth_provider.dart';
+import 'package:campusflow/features/auth/data/auth_repository_provider.dart';
+import 'package:campusflow/features/auth/data/fake_auth_repository.dart';
 import 'package:campusflow/features/taches/data/fake_task_repository.dart';
 import 'package:campusflow/features/taches/data/task_repository_provider.dart';
 import 'package:campusflow/features/taches/domain/task.dart';
 import 'package:campusflow/features/taches/presentation/task_detail_screen.dart';
 import 'package:campusflow/features/taches/presentation/task_form_screen.dart';
 import 'package:campusflow/main.dart';
+
+import 'support/fake_http.dart';
 
 final _now = DateTime.now();
 
@@ -40,23 +49,40 @@ final _tasks = [
 /// Le Repository de test : en mémoire, sans latence ni réseau.
 late FakeTaskRepository _repo;
 
+/// Le stockage chiffré de test : une session déjà ouverte (jeton et
+/// profil), comme après une connexion réussie.
+StockageMemoire _sessionOuverte() => StockageMemoire({
+  cleJeton: 'jeton-de-test',
+  cleUtilisateur: jsonEncode(utilisateurDemo.toJson()),
+});
+
 /// L'application complète (routeur et Riverpod), ouverte à [location].
-/// Seul le Repository est remplacé : Notifier, écrans et routes sont réels.
-Widget _app({String location = '/taches'}) => ProviderScope(
-  overrides: [
-    taskRepositoryProvider.overrideWithValue(_repo),
-    routerProvider.overrideWith((ref) {
-      final router = creerRouter(initialLocation: location);
-      ref.onDispose(router.dispose);
-      return router;
-    }),
-  ],
-  child: const CampusFlowApp(),
-);
+/// Seuls les Repositories et le stockage sont remplacés : Notifiers,
+/// écrans, routes et redirections sont réels.
+Widget _app({String location = '/taches', StockageMemoire? stockage}) =>
+    ProviderScope(
+      overrides: [
+        taskRepositoryProvider.overrideWithValue(_repo),
+        authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+        stockageSecuriseProvider.overrideWithValue(
+          stockage ?? _sessionOuverte(),
+        ),
+        routerProvider.overrideWith((ref) {
+          final router = creerRouter(ref, initialLocation: location);
+          ref.onDispose(router.dispose);
+          return router;
+        }),
+      ],
+      child: const CampusFlowApp(),
+    );
 
 /// Ouvre l'application et attend la fin du `GET /taches`.
-Future<void> _ouvrir(WidgetTester tester, {String location = '/taches'}) async {
-  await tester.pumpWidget(_app(location: location));
+Future<void> _ouvrir(
+  WidgetTester tester, {
+  String location = '/taches',
+  StockageMemoire? stockage,
+}) async {
+  await tester.pumpWidget(_app(location: location, stockage: stockage));
   await tester.pumpAndSettle();
 }
 
@@ -368,6 +394,116 @@ void main() {
       expect(enregistree.title, 'Projet ML');
       expect(enregistree.id, isNot(isEmpty));
       expect(find.text('Projet ML'), findsOneWidget);
+    });
+  });
+
+  group('Séance 7 : connexion', () {
+    Future<void> saisir(WidgetTester tester, String motDePasse) async {
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Adresse universitaire'),
+        'ibrahim.kabore@universite.bf',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Mot de passe'),
+        motDePasse,
+      );
+      await tester.tap(find.text('Se connecter'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Sans session : /login, puis retour à la page demandée', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      final stockage = StockageMemoire();
+      await _ouvrir(tester, location: '/taches/a', stockage: stockage);
+
+      expect(find.text('Connexion'), findsOneWidget);
+      expect(_router(tester).state.uri.path, '/login');
+
+      await saisir(tester, 'faux');
+      expect(find.text('Adresse ou mot de passe incorrect.'), findsOneWidget);
+      expect(stockage.valeurs, isEmpty);
+
+      await saisir(tester, 'campus2026');
+      expect(_router(tester).state.uri.path, '/taches/a');
+      expect(find.text('Modèles et tests'), findsOneWidget);
+      expect(stockage.valeurs[cleJeton], 'jeton-de-test');
+    });
+
+    testWidgets('Se déconnecter : jeton effacé, retour à la connexion', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      final stockage = _sessionOuverte();
+      await _ouvrir(tester, location: '/profil', stockage: stockage);
+
+      final bouton = find.text('Se déconnecter');
+      await tester.ensureVisible(bouton);
+      await tester.tap(bouton);
+      await tester.pumpAndSettle();
+
+      expect(_router(tester).state.uri.path, '/login');
+      expect(stockage.valeurs, isEmpty);
+    });
+
+    testWidgets('Parcours complet : Bearer envoyé, 401 → écran de connexion', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      var jetonValide = true;
+      final http = FakeHttpAdapter((requete) {
+        if (requete.path == '/login') {
+          return (
+            code: 200,
+            json: {'jeton': 'a.b.c', 'utilisateur': utilisateurDemo.toJson()},
+          );
+        }
+        if (!jetonValide) return (code: 401, json: {'message': 'expiré'});
+        if (requete.method == 'PATCH') {
+          return (
+            code: 200,
+            json: {..._tasks.first.toJson(), 'terminee': true},
+          );
+        }
+        return (code: 200, json: [for (final t in _tasks) t.toJson()]);
+      });
+      final stockage = StockageMemoire();
+
+      // Le vrai Dio (intercepteur compris) et les vrais Repositories API :
+      // seul le réseau est simulé.
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            stockageSecuriseProvider.overrideWithValue(stockage),
+            dioProvider.overrideWith(
+              (ref) => creerDio(ref)..httpClientAdapter = http,
+            ),
+            routerProvider.overrideWith((ref) {
+              final router = creerRouter(ref, initialLocation: '/taches');
+              ref.onDispose(router.dispose);
+              return router;
+            }),
+          ],
+          child: const CampusFlowApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await saisir(tester, 'campus2026');
+
+      // GET /taches est parti avec le jeton reçu de /login.
+      final get = http.requetes.lastWhere((r) => r.chemin == '/taches');
+      expect(get.entetes['Authorization'], 'Bearer a.b.c');
+      expect(find.text('Rendu TP Dart'), findsOneWidget);
+
+      // Le jeton expire : le PATCH reçoit 401.
+      jetonValide = false;
+      await tester.tap(find.byTooltip('Marquer Rendu TP Dart comme fait'));
+      await tester.pumpAndSettle();
+
+      expect(_router(tester).state.uri.path, '/login');
+      expect(find.text('Session expirée : reconnecte-toi.'), findsOneWidget);
+      expect(stockage.valeurs, isEmpty);
     });
   });
 }
