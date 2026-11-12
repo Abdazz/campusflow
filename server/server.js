@@ -85,10 +85,21 @@ server.use((req, res, next) => {
 // ni l'instantané complet `/db` de json-server.
 // Toute requête qui vise `utilisateurs` est refusée, y compris par une
 // route imbriquée (`/cours/dm/utilisateurs`) ou `_embed` / `_expand`.
+// L'instantané `/db` (toute la base, servi sans passer par router.render)
+// est interdit : montage Express (insensible à la casse, sous-chemins
+// compris) et contrôle sur le chemin normalisé.
+const interdit = (req, res) => res.status(403).json({ message: 'Interdit.' });
+server.use('/db', interdit);
 server.use((req, res, next) => {
-  const cible = decodeURIComponent(req.originalUrl).toLowerCase();
-  if (req.path === '/db' || cible.includes('utilisateur')) {
-    return res.status(403).json({ message: 'Interdit.' });
+  let cible;
+  try {
+    cible = decodeURIComponent(req.originalUrl).toLowerCase();
+  } catch {
+    return interdit(req, res); // adresse mal encodée
+  }
+  const chemin = cible.split('?')[0].replace(/\/{2,}/g, '/').replace(/\/+$/, '');
+  if (chemin === '/db' || chemin.startsWith('/db/') || cible.includes('utilisateur')) {
+    return interdit(req, res);
   }
   next();
 });
