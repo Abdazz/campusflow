@@ -83,8 +83,15 @@ server.use((req, res, next) => {
 
 // Les comptes (mots de passe) ne sont jamais exposés : ni la collection,
 // ni l'instantané complet `/db` de json-server.
-server.use(['/utilisateurs', '/db'], (req, res) =>
-  res.status(403).json({ message: 'Interdit.' }));
+// Toute requête qui vise `utilisateurs` est refusée, y compris par une
+// route imbriquée (`/cours/dm/utilisateurs`) ou `_embed` / `_expand`.
+server.use((req, res, next) => {
+  const cible = decodeURIComponent(req.originalUrl).toLowerCase();
+  if (req.path === '/db' || cible.includes('utilisateur')) {
+    return res.status(403).json({ message: 'Interdit.' });
+  }
+  next();
+});
 
 // Filet de sécurité : aucun `motDePasse` dans une réponse, quelle que soit
 // la route (`_embed`, `_expand`…).
