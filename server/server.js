@@ -81,8 +81,23 @@ server.use((req, res, next) => {
   next();
 });
 
-// La collection des comptes (mots de passe) n'est jamais exposée.
-server.use('/utilisateurs', (req, res) => res.status(403).json({ message: 'Interdit.' }));
+// Les comptes (mots de passe) ne sont jamais exposés : ni la collection,
+// ni l'instantané complet `/db` de json-server.
+server.use(['/utilisateurs', '/db'], (req, res) =>
+  res.status(403).json({ message: 'Interdit.' }));
+
+// Filet de sécurité : aucun `motDePasse` dans une réponse, quelle que soit
+// la route (`_embed`, `_expand`…).
+const sansMotDePasse = (valeur) => {
+  if (Array.isArray(valeur)) return valeur.map(sansMotDePasse);
+  if (valeur && typeof valeur === 'object') {
+    const { motDePasse: _cache, ...reste } = valeur;
+    return Object.fromEntries(
+      Object.entries(reste).map(([cle, v]) => [cle, sansMotDePasse(v)]));
+  }
+  return valeur;
+};
+router.render = (req, res) => res.jsonp(sansMotDePasse(res.locals.data));
 
 server.use(router);
 
