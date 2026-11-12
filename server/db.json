@@ -1,0 +1,100 @@
+{
+  "taches": [
+    {
+      "id": "t1",
+      "titre": "Rendu TP Dart",
+      "coursId": "dm",
+      "echeance": "2026-11-12T23:59:00",
+      "terminee": false,
+      "description": "Modèles Task, Course et User avec leurs tests. Déposer le fichier .zip sur la plateforme.",
+      "rappel": "sameDay"
+    },
+    {
+      "id": "t2",
+      "titre": "Dossier de conception v1",
+      "coursId": "dm",
+      "echeance": "2026-11-13T18:00:00",
+      "terminee": false,
+      "description": "Persona, parcours, wireframes et design system v1 de CampusFlow.",
+      "rappel": "dayBefore"
+    },
+    {
+      "id": "t3",
+      "titre": "Projet Flutter — maquette",
+      "coursId": "dm",
+      "echeance": "2026-11-14T17:00:00",
+      "terminee": false,
+      "description": "Maquette haute fidélité des écrans principaux de CampusFlow, à partir du design system v1. Déposer le lien sur la plateforme.",
+      "rappel": "dayBefore"
+    },
+    {
+      "id": "t4",
+      "titre": "Exposé en binôme",
+      "coursId": "fd",
+      "echeance": "2026-11-14T08:00:00",
+      "terminee": false,
+      "description": null,
+      "rappel": "dayBefore"
+    },
+    {
+      "id": "t5",
+      "titre": "Fiche persona",
+      "coursId": "dm",
+      "echeance": "2026-11-11T18:00:00",
+      "terminee": true,
+      "description": null,
+      "rappel": "dayBefore"
+    },
+    {
+      "id": "t6",
+      "titre": "Lecture : arbres de décision",
+      "coursId": "aa",
+      "echeance": "2026-11-10T10:00:00",
+      "terminee": true,
+      "description": null,
+      "rappel": "none"
+    }
+  ],
+  "cours": [
+    {
+      "id": "dm",
+      "nom": "Développement mobile",
+      "enseignant": "M. Compaoré"
+    },
+    {
+      "id": "fd",
+      "nom": "Fouille de données",
+      "enseignant": "Mme Ouédraogo"
+    },
+    {
+      "id": "aa",
+      "nom": "Apprentissage automatique",
+      "enseignant": "M. Sawadogo"
+    },
+    {
+      "id": "st",
+      "nom": "Statistiques",
+      "enseignant": "Mme Traoré"
+    },
+    {
+      "id": "at",
+      "nom": "Anglais technique",
+      "enseignant": "Mme Zongo"
+    },
+    {
+      "id": "gp",
+      "nom": "Gestion de projet",
+      "enseignant": "M. Ilboudo"
+    }
+  ],
+  "utilisateurs": [
+    {
+      "id": "u1",
+      "nom": "Ibrahim Kaboré",
+      "initiales": "IK",
+      "email": "ibrahim.kabore@universite.bf",
+      "programme": "Master 1 Intelligence Artificielle",
+      "motDePasse": "campus2026"
+    }
+  ]
+}
