@@ -1,14 +1,15 @@
-import 'package:campusflow/main.dart';
-import 'package:campusflow/models/task.dart';
-import 'package:campusflow/router.dart';
-import 'package:campusflow/screens/task_detail_screen.dart';
-import 'package:campusflow/screens/task_form_screen.dart';
-import 'package:campusflow/state/taches_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+
+import 'package:campusflow/core/router.dart';
+import 'package:campusflow/features/taches/application/taches_provider.dart';
+import 'package:campusflow/features/taches/domain/task.dart';
+import 'package:campusflow/features/taches/presentation/task_detail_screen.dart';
+import 'package:campusflow/features/taches/presentation/task_form_screen.dart';
+import 'package:campusflow/main.dart';
 
 final _now = DateTime.now();
 

@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 
-import 'router.dart';
-import 'theme/app_theme.dart';
+import 'package:campusflow/core/router.dart';
+import 'package:campusflow/core/theme.dart';
 
 Future<void> main() async {
   // Dates en français avec le package intl (« ven. 6 nov. »).

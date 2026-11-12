@@ -1,8 +1,9 @@
-import 'package:campusflow/models/task.dart';
-import 'package:campusflow/state/filtres_provider.dart';
-import 'package:campusflow/state/taches_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:campusflow/features/taches/application/filtres_provider.dart';
+import 'package:campusflow/features/taches/application/taches_provider.dart';
+import 'package:campusflow/features/taches/domain/task.dart';
 
 /// Les fournisseurs se testent sans afficher de widget.
 void main() {
