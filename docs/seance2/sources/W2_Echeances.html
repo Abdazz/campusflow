@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Wireframe — Échéances de la semaine</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#222222}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: 'Figtree', system-ui, sans-serif; color: #222222; display: flex; flex-direction: column; position: relative">
+  <!-- Barre supérieure -->
+  <div style="padding: 48px 20px 12px; display: flex; flex-direction: column; gap: 4px; border-bottom: 1px solid #E0E0E0">
+    <div style="display: flex; justify-content: space-between; align-items: center">
+      <div style="font-size: 26px; font-weight: 700">Cette semaine</div>
+      <button aria-label="Filtrer" style="width: 48px; height: 48px; border: 1.5px solid #BDBDBD; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 12px; color: #555555">Filtre</button>
+    </div>
+    <div style="font-size: 14px; color: #555555">Mer. 14 – mar. 20 oct. · 5 échéances</div>
+    <div style="display: flex; gap: 8px; margin-top: 10px">
+      <button style="height: 40px; padding: 0 16px; border-radius: 999px; border: none; background: #333333; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 600">À faire</button>
+      <button style="height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #BDBDBD; background: #FFFFFF; font-family: inherit; font-size: 14px; color: #222222">Terminées</button>
+    </div>
+  </div>
+
+  <!-- Liste -->
+  <div style="flex-grow: 1; padding: 8px 16px 0; display: flex; flex-direction: column; gap: 6px; overflow: hidden">
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; padding: 10px 4px 2px">Aujourd'hui</div>
+    <div style="display: flex; align-items: center; gap: 4px; border: 1.5px solid #333333; border-radius: 12px; padding: 4px 12px 4px 4px">
+      <button aria-label="Marquer comme fait" style="width: 48px; height: 48px; border: none; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 22px; height: 22px; border: 2px solid #555555; border-radius: 6px; display: block"></span></button>
+      <a href="W3_Detail.dc.html" style="flex-grow: 1; text-decoration: none; padding: 10px 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 16px; font-weight: 600">Rendu TP Dart</span>
+        <span style="font-size: 13px; color: #555555">Développement mobile · 23 h 59</span>
+      </a>
+      <span style="font-size: 12px; font-weight: 700; border: 1.5px solid #333333; border-radius: 999px; padding: 3px 9px">Aujourd'hui</span>
+    </div>
+
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; padding: 10px 4px 2px">Demain · jeu. 15</div>
+    <div style="display: flex; align-items: center; gap: 4px; border: 1.5px solid #BDBDBD; border-radius: 12px; padding: 4px 12px 4px 4px">
+      <button aria-label="Marquer comme fait" style="width: 48px; height: 48px; border: none; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 22px; height: 22px; border: 2px solid #555555; border-radius: 6px; display: block"></span></button>
+      <a href="W3_Detail.dc.html" style="flex-grow: 1; text-decoration: none; padding: 10px 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 16px; font-weight: 600">Dossier de conception v1</span>
+        <span style="font-size: 13px; color: #555555">Développement mobile · 18 h</span>
+      </a>
+      <span style="font-size: 12px; font-weight: 700; border: 1.5px solid #333333; border-radius: 999px; padding: 3px 9px">J-1</span>
+    </div>
+
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; padding: 10px 4px 2px">Vendredi 16</div>
+    <div style="display: flex; align-items: center; gap: 4px; border: 1.5px solid #BDBDBD; border-radius: 12px; padding: 4px 12px 4px 4px">
+      <button aria-label="Marquer comme fait" style="width: 48px; height: 48px; border: none; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 22px; height: 22px; border: 2px solid #555555; border-radius: 6px; display: block"></span></button>
+      <a href="W3_Detail.dc.html" style="flex-grow: 1; text-decoration: none; padding: 10px 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 16px; font-weight: 600">Projet Flutter — maquette</span>
+        <span style="font-size: 13px; color: #555555">Développement mobile · 17 h</span>
+      </a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 4px; border: 1.5px solid #BDBDBD; border-radius: 12px; padding: 4px 12px 4px 4px">
+      <button aria-label="Marquer comme fait" style="width: 48px; height: 48px; border: none; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 22px; height: 22px; border: 2px solid #555555; border-radius: 6px; display: block"></span></button>
+      <a href="W3_Detail.dc.html" style="flex-grow: 1; text-decoration: none; padding: 10px 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 16px; font-weight: 600">Exposé en binôme</span>
+        <span style="font-size: 13px; color: #555555">Fouille de données · 8 h</span>
+      </a>
+    </div>
+
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #555555; padding: 10px 4px 2px">Lundi 19</div>
+    <div style="display: flex; align-items: center; gap: 4px; border: 1.5px solid #BDBDBD; border-radius: 12px; padding: 4px 12px 4px 4px">
+      <button aria-label="Marquer comme fait" style="width: 48px; height: 48px; border: none; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 22px; height: 22px; border: 2px solid #555555; border-radius: 6px; display: block"></span></button>
+      <a href="W3_Detail.dc.html" style="flex-grow: 1; text-decoration: none; padding: 10px 0; display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 16px; font-weight: 600">Examen UX</span>
+        <span style="font-size: 13px; color: #555555">Développement mobile · 9 h</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Bouton d'action principal -->
+  <a href="W4_NouvelleTache.dc.html" style="position: absolute; right: 16px; bottom: 100px; height: 56px; padding: 0 22px; border-radius: 16px; background: #333333; color: #FFFFFF; display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.25)"><span style="font-size: 22px; line-height: 22px">+</span>Nouvelle tâche</a>
+
+  <!-- Barre de navigation -->
+  <nav aria-label="Navigation principale" style="height: 84px; border-top: 1px solid #E0E0E0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: #FFFFFF; padding-bottom: 8px; box-sizing: border-box">
+    <a href="W2_Echeances.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none"><span style="width: 56px; height: 30px; border-radius: 999px; background: #DDDDDD; display: flex; align-items: center; justify-content: center"><span style="width: 18px; height: 18px; border: 2px solid #222222; border-radius: 4px; display: block"></span></span><span style="font-size: 13px; font-weight: 700">Échéances</span></a>
+    <a href="W5_Cours.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none"><span style="width: 56px; height: 30px; display: flex; align-items: center; justify-content: center"><span style="width: 18px; height: 18px; border: 2px solid #555555; border-radius: 4px; display: block"></span></span><span style="font-size: 13px; color: #555555">Cours</span></a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none"><span style="width: 56px; height: 30px; display: flex; align-items: center; justify-content: center"><span style="width: 18px; height: 18px; border: 2px solid #555555; border-radius: 999px; display: block"></span></span><span style="font-size: 13px; color: #555555">Profil</span></a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

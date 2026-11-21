@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Variante C HF — Bandeau semaine</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#2E3A8C}a:hover{color:#1A2266}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F7F6F2; font-family: 'Figtree', system-ui, sans-serif; color: #1B1B1F; display: flex; flex-direction: column; position: relative; overflow: hidden">
+  <!-- En-tête -->
+  <div style="padding: 28px 16px 0; display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 4px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 800; letter-spacing: -0.02em">Octobre</h1>
+        <div style="font-size: 14px; color: #5E5E66">Semaine 42 · 4 échéances</div>
+      </div>
+      <span aria-label="Profil d'Ibrahim" style="width: 48px; height: 48px; border-radius: 999px; background: #E3E6F7; color: #1A2266; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700">IK</span>
+    </div>
+
+    <div role="tablist" aria-label="Jours de la semaine" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+      <button role="tab" aria-selected="false" aria-label="Lundi 12, aucune échéance" style="height: 72px; border: none; border-radius: 14px; background: transparent; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #5E5E66"><span style="font-size: 12px; font-weight: 600">Lun</span><span style="font-size: 17px; font-weight: 700; color: #8A8A93">12</span><span style="height: 6px"></span></button>
+      <button role="tab" aria-selected="false" aria-label="Mardi 13, aucune échéance" style="height: 72px; border: none; border-radius: 14px; background: transparent; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #5E5E66"><span style="font-size: 12px; font-weight: 600">Mar</span><span style="font-size: 17px; font-weight: 700; color: #8A8A93">13</span><span style="height: 6px"></span></button>
+      <button role="tab" aria-selected="true" aria-label="Mercredi 14, aujourd'hui, 1 échéance" style="height: 72px; border: none; border-radius: 14px; background: #2E3A8C; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #FFFFFF; box-shadow: 0 6px 14px rgba(46, 58, 140, 0.3)"><span style="font-size: 12px; font-weight: 600; color: #E3E6F7">Mer</span><span style="font-size: 17px; font-weight: 800">14</span><span style="width: 6px; height: 6px; border-radius: 999px; background: #FFFFFF"></span></button>
+      <button role="tab" aria-selected="false" aria-label="Jeudi 15, 1 échéance" style="height: 72px; border: none; border-radius: 14px; background: #FFFFFF; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #5E5E66"><span style="font-size: 12px; font-weight: 600">Jeu</span><span style="font-size: 17px; font-weight: 700; color: #1B1B1F">15</span><span style="width: 6px; height: 6px; border-radius: 999px; background: #2E3A8C"></span></button>
+      <button role="tab" aria-selected="false" aria-label="Vendredi 16, 2 échéances" style="height: 72px; border: none; border-radius: 14px; background: #FFFFFF; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #5E5E66"><span style="font-size: 12px; font-weight: 600">Ven</span><span style="font-size: 17px; font-weight: 700; color: #1B1B1F">16</span><span style="display: flex; gap: 3px"><span style="width: 6px; height: 6px; border-radius: 999px; background: #2E3A8C"></span><span style="width: 6px; height: 6px; border-radius: 999px; background: #2E3A8C"></span></span></button>
+      <button role="tab" aria-selected="false" aria-label="Samedi 17, aucune échéance" style="height: 72px; border: none; border-radius: 14px; background: #FFFFFF; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #5E5E66"><span style="font-size: 12px; font-weight: 600">Sam</span><span style="font-size: 17px; font-weight: 700; color: #1B1B1F">17</span><span style="height: 6px"></span></button>
+      <button role="tab" aria-selected="false" aria-label="Dimanche 18, aucune échéance" style="height: 72px; border: none; border-radius: 14px; background: #FFFFFF; font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #5E5E66"><span style="font-size: 12px; font-weight: 600">Dim</span><span style="font-size: 17px; font-weight: 700; color: #1B1B1F">18</span><span style="height: 6px"></span></button>
+    </div>
+
+    <div style="background: #2E3A8C; color: #FFFFFF; border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <div style="font-size: 18px; font-weight: 700">4 échéances à venir</div>
+        <div style="font-size: 13px; color: #E3E6F7; white-space: nowrap">1 aujourd'hui</div>
+      </div>
+      <div style="height: 6px; border-radius: 999px; background: #4652A8; overflow: hidden"><div style="width: 33%; height: 6px; border-radius: 999px; background: #FFFFFF"></div></div>
+    </div>
+  </div>
+
+  <!-- Jour sélectionné -->
+  <div style="flex-grow: 1; padding: 6px 16px 0; display: flex; flex-direction: column; gap: 8px">
+    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #5E5E66; padding: 10px 4px 0">Mercredi 14 · aujourd'hui</div>
+    <div style="display: flex; align-items: center; background: #FFFFFF; border: 1.5px solid #E8C2A3; border-radius: 14px; padding: 4px 14px 4px 4px">
+      <span style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><span style="width: 22px; height: 22px; border: 2px solid #A84B00; border-radius: 7px; box-sizing: border-box"></span></span>
+      <span style="flex-grow: 1; padding: 10px 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">Rendu TP Dart</span><span style="font-size: 13px; color: #5E5E66">Développement mobile</span></span>
+      <span style="font-size: 12px; font-weight: 700; background: #FCE9DA; color: #A84B00; border-radius: 999px; padding: 4px 10px; white-space: nowrap">23 h 59</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 14px 6px; font-size: 14px; color: #5E5E66">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5E5E66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11V5a2 2 0 014 0v6"></path><path d="M13 10.5a2 2 0 014 0V14a6 6 0 01-6 6h-1a5 5 0 01-4.2-2.3L4 15a1.8 1.8 0 012.9-2l2.1 1.9"></path></svg>
+      Touchez un autre jour pour voir ses échéances
+    </div>
+  </div>
+
+  <span style="position: absolute; right: 16px; bottom: 96px; height: 56px; padding: 0 20px 0 16px; border-radius: 16px; background: #2E3A8C; color: #FFFFFF; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; box-shadow: 0 8px 20px rgba(46, 58, 140, 0.35)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle tâche</span>
+
+  <nav aria-label="Navigation principale" style="height: 80px; flex-shrink: 0; border-top: 1px solid #E4E4E8; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: #FFFFFF">
+    <span style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #1A2266"><span style="width: 64px; height: 32px; border-radius: 999px; background: #E3E6F7; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A2266" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg></span><span style="font-size: 12px; font-weight: 700">Échéances</span></span>
+    <span style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #5E5E66"><span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5E5E66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h10a4 4 0 014 4v12H8a4 4 0 01-4-4z"></path><path d="M4 16a4 4 0 014-4h10"></path></svg></span><span style="font-size: 12px; font-weight: 600">Cours</span></span>
+    <span style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #5E5E66"><span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5E5E66" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></span><span style="font-size: 12px; font-weight: 600">Profil</span></span>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

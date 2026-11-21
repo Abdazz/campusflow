@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Wireframe — Détail d'une tâche</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#222222}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: 'Figtree', system-ui, sans-serif; color: #222222; display: flex; flex-direction: column">
+  <!-- Barre supérieure -->
+  <div style="padding: 40px 8px 8px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #E0E0E0">
+    <a href="W2_Echeances.dc.html" aria-label="Retour aux échéances" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px; text-decoration: none">←</a>
+    <div style="font-size: 18px; font-weight: 700; flex-grow: 1">Détail</div>
+    <a href="W4_NouvelleTache.dc.html" style="height: 48px; padding: 0 14px; display: flex; align-items: center; font-size: 15px; font-weight: 600">Modifier</a>
+  </div>
+
+  <div style="flex-grow: 1; padding: 20px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <span style="align-self: flex-start; font-size: 12px; font-weight: 700; border: 1.5px solid #333333; border-radius: 999px; padding: 3px 10px">Dans 2 jours</span>
+      <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 700">Projet Flutter — maquette</h1>
+    </div>
+
+    <div style="display: flex; flex-direction: column; border: 1.5px solid #BDBDBD; border-radius: 12px">
+      <div style="display: flex; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #E0E0E0; font-size: 15px"><span style="color: #555555">Cours</span><span style="font-weight: 600">Développement mobile</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #E0E0E0; font-size: 15px"><span style="color: #555555">Échéance</span><span style="font-weight: 600">Ven. 16 oct. · 17 h</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 14px 16px; font-size: 15px"><span style="color: #555555">Rappel</span><span style="font-weight: 600">La veille à 18 h</span></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 14px; font-weight: 700">Description</div>
+      <div style="height: 12px; width: 100%; background: #E0E0E0; border-radius: 4px"></div>
+      <div style="height: 12px; width: 92%; background: #E0E0E0; border-radius: 4px"></div>
+      <div style="height: 12px; width: 70%; background: #E0E0E0; border-radius: 4px"></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="font-size: 14px; font-weight: 700">Consigne jointe</div>
+      <div style="height: 150px; border: 2px dashed #9E9E9E; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #555555; text-align: center; padding: 0 24px">Photo du slide de la consigne (consultable hors ligne)</div>
+    </div>
+  </div>
+
+  <div style="padding: 16px 20px 32px; border-top: 1px solid #E0E0E0; display: flex; flex-direction: column; gap: 8px">
+    <a href="W2_Echeances.dc.html" style="height: 52px; border-radius: 8px; background: #333333; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Marquer comme fait</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

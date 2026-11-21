@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Wireframe — Nouvelle tâche</title>
+
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#222222}a:hover{color:#000000}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FFFFFF; font-family: 'Figtree', system-ui, sans-serif; color: #222222; display: flex; flex-direction: column">
+  <!-- Barre supérieure -->
+  <div style="padding: 40px 8px 8px; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid #E0E0E0">
+    <a href="W2_Echeances.dc.html" aria-label="Fermer sans enregistrer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px; text-decoration: none">×</a>
+    <div style="font-size: 18px; font-weight: 700; flex-grow: 1">Nouvelle tâche</div>
+  </div>
+
+  <div style="flex-grow: 1; padding: 20px; display: flex; flex-direction: column; gap: 18px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="w4-titre" style="font-size: 14px; font-weight: 600">Titre</label>
+      <input id="w4-titre" type="text" placeholder="Ex. : Rendu TP Dart" style="height: 52px; border: 2px solid #333333; border-radius: 8px; padding: 0 14px; font-size: 16px; font-family: inherit">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="w4-cours" style="font-size: 14px; font-weight: 600">Cours</label>
+      <select id="w4-cours" style="height: 52px; border: 1.5px solid #9E9E9E; border-radius: 8px; padding: 0 12px; font-size: 16px; font-family: inherit; background: #FFFFFF; color: #222222">
+        <option>Développement mobile (dernier utilisé)</option>
+        <option>Fouille de données</option>
+      </select>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="w4-date" style="font-size: 14px; font-weight: 600">Date</label>
+        <input id="w4-date" type="text" value="Ven. 16 oct." style="height: 52px; border: 1.5px solid #9E9E9E; border-radius: 8px; padding: 0 12px; font-size: 16px; font-family: inherit">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="w4-heure" style="font-size: 14px; font-weight: 600">Heure</label>
+        <input id="w4-heure" type="text" value="23 h 59" style="height: 52px; border: 1.5px solid #9E9E9E; border-radius: 8px; padding: 0 12px; font-size: 16px; font-family: inherit">
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <label for="w4-rappel" style="font-size: 14px; font-weight: 600">Rappel</label>
+      <select id="w4-rappel" style="height: 52px; border: 1.5px solid #9E9E9E; border-radius: 8px; padding: 0 12px; font-size: 16px; font-family: inherit; background: #FFFFFF; color: #222222">
+        <option>La veille à 18 h</option>
+        <option>Le jour même à 8 h</option>
+        <option>Aucun</option>
+      </select>
+    </div>
+    <button style="height: 64px; border: 2px dashed #9E9E9E; border-radius: 12px; background: #FFFFFF; font-family: inherit; font-size: 15px; color: #222222; display: flex; align-items: center; justify-content: center; gap: 8px"><span style="font-size: 20px">+</span>Joindre la photo de la consigne</button>
+    <div style="font-size: 13px; color: #555555">Cours, date et rappel sont pré-remplis : titre puis Enregistrer suffit.</div>
+  </div>
+
+  <div style="padding: 16px 20px 32px; border-top: 1px solid #E0E0E0">
+    <a href="W2_Echeances.dc.html" style="height: 52px; border-radius: 8px; background: #333333; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; text-decoration: none">Enregistrer</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
