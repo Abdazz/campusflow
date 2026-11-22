@@ -249,6 +249,9 @@ void main() {
     expect(find.text('Titre requis'), findsOneWidget);
 
     await tester.enterText(find.byType(TextFormField).first, 'Projet ML');
+    await tester.pump();
+    // Revalidé à la saisie : le message disparaît sans réappuyer.
+    expect(find.text('Titre requis'), findsNothing);
     await tester.ensureVisible(save);
     await tester.tap(save);
     await tester.pumpAndSettle();
@@ -431,6 +434,26 @@ void main() {
       expect(stockage.valeurs[cleJeton], 'jeton-de-test');
     });
 
+    testWidgets('Champs vides : erreurs, effacées dès la saisie', (
+      tester,
+    ) async {
+      _setScreenSize(tester, const Size(390, 844));
+      await _ouvrir(tester, location: '/login', stockage: StockageMemoire());
+
+      await tester.tap(find.text('Se connecter'));
+      await tester.pump();
+      expect(find.text('Adresse requise'), findsOneWidget);
+      expect(find.text('Mot de passe requis'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Adresse universitaire'),
+        'ibrahim.kabore@universite.bf',
+      );
+      await tester.pump();
+      expect(find.text('Adresse requise'), findsNothing);
+      expect(find.text('Mot de passe requis'), findsOneWidget);
+    });
+
     testWidgets('Se déconnecter : jeton effacé, retour à la connexion', (
       tester,
     ) async {
@@ -444,6 +467,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_router(tester).state.uri.path, '/login');
+      // Pas de « suite=/profil » : la reconnexion mène aux échéances.
+      expect(_router(tester).state.uri.queryParameters, isEmpty);
       expect(stockage.valeurs, isEmpty);
     });
 

@@ -118,8 +118,15 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
   /// Vrai pendant l'envoi au serveur : le bouton est désactivé.
   bool _enregistrement = false;
 
+  /// Après un premier essai, chaque champ se revalide à la saisie.
+  AutovalidateMode _validation = AutovalidateMode.disabled;
+
   Future<void> _save() async {
-    if (_enregistrement || !_formKey.currentState!.validate()) return;
+    if (_enregistrement) return;
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _validation = AutovalidateMode.onUserInteraction);
+      return;
+    }
 
     final description = _description.text.trim();
     final task = Task(
@@ -186,6 +193,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
       body: SafeArea(
         child: Form(
           key: _formKey,
+          autovalidateMode: _validation,
           // Défilant : le clavier et le paysage réduisent la hauteur.
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),

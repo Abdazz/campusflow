@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:campusflow/core/widgets/async_vue.dart';
 import 'package:campusflow/core/widgets/header_bar.dart';
@@ -30,8 +31,13 @@ class ProfilePage extends ConsumerWidget {
         donnee: (taches) => ProfileView(
           utilisateur: utilisateur,
           tasks: taches,
-          // Le jeton est effacé ; le routeur ramène à l'écran de connexion.
-          onDeconnexion: ref.read(authProvider.notifier).deconnecter,
+          // Le jeton est effacé, puis on ouvre `/login` sans « suite » : la
+          // reconnexion mène aux échéances, pas au profil.
+          onDeconnexion: () async {
+            final router = GoRouter.of(context);
+            await ref.read(authProvider.notifier).deconnecter();
+            router.go('/login');
+          },
         ),
       ),
     );

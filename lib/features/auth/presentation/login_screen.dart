@@ -23,6 +23,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _motDePasse = TextEditingController();
 
   bool _envoi = false;
+
+  /// Après un premier essai, chaque champ se revalide à la saisie : un
+  /// message d'erreur disparaît dès que le champ est corrigé.
+  AutovalidateMode _validation = AutovalidateMode.disabled;
   bool _masque = true;
   String? _erreur;
 
@@ -34,7 +38,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _connecter() async {
-    if (_envoi || !_formKey.currentState!.validate()) return;
+    if (_envoi) return;
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _validation = AutovalidateMode.onUserInteraction);
+      return;
+    }
     setState(() {
       _envoi = true;
       _erreur = null;
@@ -63,6 +71,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return EcranMarque(
       feuille: Form(
         key: _formKey,
+        autovalidateMode: _validation,
         child: AutofillGroup(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
