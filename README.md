@@ -25,7 +25,8 @@ Chaque ligne de la liste du sujet, et où en trouver la trace dans ce dépôt. L
   - parcours « suivre mes échéances » ;
   - wireframes W1 à W5 ;
   - variantes A, B et C de l'écran Échéances (la A est retenue après la grille du cours) ;
-  - design system v1, avec un contraste de 4,5:1 au minimum.
+  - design system v1, avec un contraste de 4,5:1 au minimum ;
+  - en plus : maquette haute fidélité des écrans H1 à H5 et des trois variantes, avec le choix confirmé.
 - **Séance 3** ([`campusflow_models/`](campusflow_models/)) : package Dart créé avec `dart create`. Il contient `Task`, `Course` et `User` (attributs `final`, `copyWith`, `fromJson`), un dépôt simulé basé sur `Future.delayed`, et des tests `dart test`. Il avait d'abord son propre dépôt Git. Il a été intégré ici avec `git subtree`, ce qui garde ses commits d'origine dans l'historique.
 
 ## Démarrer

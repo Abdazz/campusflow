@@ -17,7 +17,13 @@ Chaque planche est exportée ici en image (`images/`). Le code HTML source de ch
 En plus de ce que demande le sujet :
 
 - le logo « C-coche » : [07_logo.png](images/07_logo.png) ;
-- la maquette haute fidélité des cinq écrans (H1 à H5, `08_*`) et des trois variantes (`09_*`), avec un choix justifié (`10_*`).
+- la maquette haute fidélité, en couleur et avec le design system v1 appliqué :
+
+| Maquette haute fidélité | Fichier |
+|---|---|
+| Cinq écrans | [H1 Connexion](images/08_maquette_H1_connexion.png), [H2 Échéances](images/08_maquette_H2_echeances.png), [H3 Détail](images/08_maquette_H3_detail.png), [H4 Nouvelle tâche](images/08_maquette_H4_nouvelle_tache.png), [H5 Cours](images/08_maquette_H5_cours.png) |
+| Trois variantes de l'écran Échéances | [A Liste par jour](images/09_maquette_variante_A.png), [B Groupée par cours](images/09_maquette_variante_B.png), [C Bandeau semaine](images/09_maquette_variante_C.png) |
+| Choix justifié après la haute fidélité | [10_maquette_choix_justifie.png](images/10_maquette_choix_justifie.png) : la variante A reste retenue (5 critères sur 5) |
 
 ## Aperçu
 
@@ -34,6 +40,18 @@ En plus de ce que demande le sujet :
 | ![A](images/04_variante_A_par_jour.png) | ![B](images/04_variante_B_par_cours.png) | ![C](images/04_variante_C_semaine.png) |
 
 ![Design system v1](images/06_design_system_v1.png)
+
+### Maquette haute fidélité
+
+| H1 | H2 | H3 | H4 | H5 |
+|---|---|---|---|---|
+| ![H1 Connexion](images/08_maquette_H1_connexion.png) | ![H2 Échéances](images/08_maquette_H2_echeances.png) | ![H3 Détail](images/08_maquette_H3_detail.png) | ![H4 Nouvelle tâche](images/08_maquette_H4_nouvelle_tache.png) | ![H5 Cours](images/08_maquette_H5_cours.png) |
+
+| Variante A (retenue) | Variante B | Variante C |
+|---|---|---|
+| ![A](images/09_maquette_variante_A.png) | ![B](images/09_maquette_variante_B.png) | ![C](images/09_maquette_variante_C.png) |
+
+![Choix justifié après la haute fidélité](images/10_maquette_choix_justifie.png)
 
 ## Du design au code
 
