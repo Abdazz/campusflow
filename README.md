@@ -10,7 +10,7 @@ Chaque ligne de la liste du sujet, et où en trouver la trace dans ce dépôt. L
 | Séance | Trace attendue | Où |
 |---|---|---|
 | 1 | Fiche comparative (14 critères), autopsie sourcée, paragraphe de décision | [`docs/seance1/`](docs/seance1/) (PDF et Word) |
-| 2 | Persona, parcours, 5 wireframes avec 3 variantes d'un écran, design system v1 | [`docs/seance2/`](docs/seance2/) (planches exportées de Claude Design, maquette haute fidélité H1 à H5 en tête) |
+| 2 | Persona, parcours, 5 wireframes avec 3 variantes d'un écran, design system v1 | [`docs/seance2/`](docs/seance2/) (maquette haute fidélité H1 à H5 en tête, puis les planches exportées de Claude Design) |
 | 3 | Package `campusflow_models` : `Task`, `Course`, `User`, `fromJson`, 3 tests qui passent | [`campusflow_models/`](campusflow_models/), `cd campusflow_models && dart test` (21 tests, dont les 3 demandés) |
 | 4 | `flutter doctor` sans erreur, application sur l'émulateur, thème centralisé, asset affiché, au moins 3 commits | [`docs/seance4/flutter_doctor.txt`](docs/seance4/flutter_doctor.txt), [capture de l'écran de titre](docs/captures/01_ecran_titre_theme_asset.png), `lib/core/theme.dart`, `assets/images/logo.png` |
 | 5 | Écrans Échéances, Détail et Formulaire, version tablette à 840 dp | [liste](docs/captures/03_echeances_liste_connectee.png), [détail](docs/captures/05_detail_tache.png), [formulaire](docs/captures/08_formulaire_validator.png), [tablette](docs/captures/14_tablette_840dp_liste_detail.png) |
@@ -131,7 +131,7 @@ Choix et remarques :
 
 ## Design
 
-Les écrans reprennent le dossier de conception v1 réalisé avec Claude Design : page de tokens, logo « C-coche », maquettes haute fidélité H1 à H5 et variante A retenue pour l'écran Échéances. La police Figtree (licence OFL, `assets/fonts/OFL.txt`) est embarquée pour fonctionner hors ligne.
+Les écrans reprennent le dossier de conception v1 réalisé avec Claude Design : maquettes haute fidélité H1 à H5 et variante A retenue pour l'écran Échéances, page de tokens et logo « C-coche ». La police Figtree (licence OFL, `assets/fonts/OFL.txt`) est embarquée pour fonctionner hors ligne.
 
 L'état partagé (tâches, session, filtre actif) est géré avec Riverpod : `ref.watch` pour afficher, `ref.read` pour agir. `setState` reste pour l'état local d'un écran (champs du formulaire, bouton en cours d'envoi).
 Les modèles `Task` et `Course` viennent du TP de la séance 3 ; leurs clés JSON suivent le contrat du serveur depuis la séance 7.
