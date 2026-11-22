@@ -16,6 +16,8 @@ analyzer:
     - ios/**
     - web/**
     - linux/**
+    # Package Dart de la séance 3 : analysé à part (`cd campusflow_models && dart analyze`).
+    - campusflow_models/**
 
 linter:
   # The lint rules applied to this project can be customized in the

@@ -36,6 +36,7 @@ Depuis la séance 7, l'application lit ses tâches sur un serveur simulé (json-
 # 1. Le serveur (Node.js), sur le port 3000
 cd server
 npm install
+npm run reset        # échéances recalculées à partir d'aujourd'hui
 npm start            # compte de démo : ibrahim.kabore@universite.bf / campus2026
 
 # 2. L'application
