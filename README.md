@@ -10,7 +10,7 @@ Chaque ligne de la liste du sujet, et où en trouver la trace dans ce dépôt. L
 | Séance | Trace attendue | Où |
 |---|---|---|
 | 1 | Fiche comparative (14 critères), autopsie sourcée, paragraphe de décision | [`docs/seance1/`](docs/seance1/) (PDF et Word) |
-| 2 | Persona, parcours, 5 wireframes avec 3 variantes d'un écran, design system v1 | [`docs/seance2/`](docs/seance2/) (planches exportées de Claude Design) |
+| 2 | Persona, parcours, 5 wireframes avec 3 variantes d'un écran, design system v1 | [`docs/seance2/`](docs/seance2/) (planches exportées de Claude Design, maquette haute fidélité H1 à H5 en tête) |
 | 3 | Package `campusflow_models` : `Task`, `Course`, `User`, `fromJson`, 3 tests qui passent | [`campusflow_models/`](campusflow_models/), `cd campusflow_models && dart test` (21 tests, dont les 3 demandés) |
 | 4 | `flutter doctor` sans erreur, application sur l'émulateur, thème centralisé, asset affiché, au moins 3 commits | [`docs/seance4/flutter_doctor.txt`](docs/seance4/flutter_doctor.txt), [capture de l'écran de titre](docs/captures/01_ecran_titre_theme_asset.png), `lib/core/theme.dart`, `assets/images/logo.png` |
 | 5 | Écrans Échéances, Détail et Formulaire, version tablette à 840 dp | [liste](docs/captures/03_echeances_liste_connectee.png), [détail](docs/captures/05_detail_tache.png), [formulaire](docs/captures/08_formulaire_validator.png), [tablette](docs/captures/14_tablette_840dp_liste_detail.png) |
@@ -21,12 +21,12 @@ Chaque ligne de la liste du sujet, et où en trouver la trace dans ce dépôt. L
 
 - **Séance 1** ([`docs/seance1/`](docs/seance1/)) : Android d'abord, iOS ensuite, en cross-platform avec Flutter. La décision s'appuie sur la fiche des 14 critères et sur l'autopsie de BlackBerry.
 - **Séance 2** ([`docs/seance2/`](docs/seance2/)) :
+  - maquette haute fidélité des cinq écrans H1 à H5 et des trois variantes, avec le choix confirmé ;
   - persona Ibrahim Kaboré et ses deux job stories ;
   - parcours « suivre mes échéances » ;
   - wireframes W1 à W5 ;
   - variantes A, B et C de l'écran Échéances (la A est retenue après la grille du cours) ;
-  - design system v1, avec un contraste de 4,5:1 au minimum ;
-  - en plus : maquette haute fidélité des écrans H1 à H5 et des trois variantes, avec le choix confirmé.
+  - design system v1, avec un contraste de 4,5:1 au minimum.
 - **Séance 3** ([`campusflow_models/`](campusflow_models/)) : package Dart créé avec `dart create`. Il contient `Task`, `Course` et `User` (attributs `final`, `copyWith`, `fromJson`), un dépôt simulé basé sur `Future.delayed`, et des tests `dart test`. Il avait d'abord son propre dépôt Git. Il a été intégré ici avec `git subtree`, ce qui garde ses commits d'origine dans l'historique.
 
 ## Démarrer
